@@ -18,6 +18,60 @@ export interface Tool {
 
 export const tools: Tool[] = [
   // Formatters
+    {
+    id: "qr-generator",
+    title: "QR Code Generator",
+    description: "Generate QR codes for text and URLs",
+    icon: FileImage,
+    href: "/tools/qr-generator",
+    category: "Utility",
+    featured: true,
+  },
+    // Generators
+  {
+    id: "uuid-generator",
+    title: "UUID Generator",
+    description: "Generate version 4 UUIDs",
+    icon: Zap,
+    href: "/tools/uuid-generator",
+    category: "Generator",
+    featured: true
+  },
+  {
+    id: "password-generator",
+    title: "Password Generator",
+    description: "Create secure random passwords",
+    icon: Lock,
+    href: "/tools/password-generator",
+    category: "Generator",
+    featured: true
+  },
+    {
+    id: "base64-encode",
+    title: "Base64 Encoder",
+    description: "Encode text and files to Base64 format",
+    icon: Binary,
+    href: "/tools/base64-encode",
+    category: "Converter",
+    featured: true
+  },
+  {
+    id: "base64-decode",
+    title: "Base64 Decoder",
+    description: "Decode Base64 strings back to original format",
+    icon: RefreshCw,
+    href: "/tools/base64-decode",
+    category: "Converter",
+    featured: true
+  },
+    {
+    id: "regex-tester",
+    title: "Regex Tester",
+    description: "Test and debug regular expressions",
+    icon: Search,
+    href: "/tools/regex-tester",
+    category: "Utility"
+  },
   {
     id: "json-formatter",
     title: "JSON Formatter",
@@ -27,6 +81,24 @@ export const tools: Tool[] = [
     category: "Formatter",
     featured: true
   },
+  {
+    id: "image-optimizer",
+    title: "Image Optimizer",
+    description: "Compress and optimize images",
+    icon: Image,
+    href: "/tools/image-optimizer",
+    category: "Utility",
+    featured: true,
+  },
+  {
+    id: "lorem-generator",
+    title: "Lorem Ipsum Generator",
+    description: "Generate placeholder text for designs",
+    icon: Type,
+    href: "/tools/lorem-generator",
+    category: "Generator"
+  },
+
   {
     id: "html-formatter",
     title: "HTML Formatter",
@@ -83,24 +155,6 @@ export const tools: Tool[] = [
 
   // Converters
   {
-    id: "base64-encode",
-    title: "Base64 Encoder",
-    description: "Encode text and files to Base64 format",
-    icon: Binary,
-    href: "/tools/base64-encode",
-    category: "Converter",
-    featured: true
-  },
-  {
-    id: "base64-decode",
-    title: "Base64 Decoder",
-    description: "Decode Base64 strings back to original format",
-    icon: RefreshCw,
-    href: "/tools/base64-decode",
-    category: "Converter",
-    featured: true
-  },
-  {
     id: "url-encode",
     title: "URL Encoder",
     description: "Encode URLs for safe transmission",
@@ -125,34 +179,6 @@ export const tools: Tool[] = [
     category: "Converter"
   },
 
-  // Generators
-  {
-    id: "uuid-generator",
-    title: "UUID Generator",
-    description: "Generate version 4 UUIDs",
-    icon: Zap,
-    href: "/tools/uuid-generator",
-    category: "Generator",
-    featured: true
-  },
-  {
-    id: "password-generator",
-    title: "Password Generator",
-    description: "Create secure random passwords",
-    icon: Lock,
-    href: "/tools/password-generator",
-    category: "Generator",
-    featured: true
-  },
-  {
-    id: "lorem-generator",
-    title: "Lorem Ipsum Generator",
-    description: "Generate placeholder text for designs",
-    icon: Type,
-    href: "/tools/lorem-generator",
-    category: "Generator"
-  },
-
   // Utilities
   {
     id: "color-picker",
@@ -162,36 +188,13 @@ export const tools: Tool[] = [
     href: "/tools/color-picker",
     category: "Utility"
   },
-  {
-    id: "image-optimizer",
-    title: "Image Optimizer",
-    description: "Compress and optimize images",
-    icon: Image,
-    href: "/tools/image-optimizer",
-    category: "Utility"
-  },
-  {
-    id: "qr-generator",
-    title: "QR Code Generator",
-    description: "Generate QR codes for text and URLs",
-    icon: FileImage,
-    href: "/tools/qr-generator",
-    category: "Utility"
-  },
+
   {
     id: "timestamp-converter",
     title: "Timestamp Converter",
     description: "Convert between timestamps and dates",
     icon: Clock,
     href: "/tools/timestamp-converter",
-    category: "Utility"
-  },
-  {
-    id: "regex-tester",
-    title: "Regex Tester",
-    description: "Test and debug regular expressions",
-    icon: Search,
-    href: "/tools/regex-tester",
     category: "Utility"
   },
   {
