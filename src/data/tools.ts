@@ -28,14 +28,14 @@ export const tools: Tool[] = [
     featured: true,
   },
     // Generators
-  {
-    id: "uuid-generator",
-    title: "UUID Generator",
-    description: "Generate version 4 UUIDs",
-    icon: Zap,
-    href: "/tools/uuid-generator",
-    category: "Generator",
-    featured: true
+    {
+    id: "image-optimizer",
+    title: "Image Optimizer",
+    description: "Compress and optimize images",
+    icon: Image,
+    href: "/tools/image-optimizer",
+    category: "Utility",
+    featured: true,
   },
   {
     id: "password-generator",
@@ -82,15 +82,6 @@ export const tools: Tool[] = [
     featured: true
   },
   {
-    id: "image-optimizer",
-    title: "Image Optimizer",
-    description: "Compress and optimize images",
-    icon: Image,
-    href: "/tools/image-optimizer",
-    category: "Utility",
-    featured: true,
-  },
-  {
     id: "lorem-generator",
     title: "Lorem Ipsum Generator",
     description: "Generate placeholder text for designs",
@@ -98,7 +89,15 @@ export const tools: Tool[] = [
     href: "/tools/lorem-generator",
     category: "Generator"
   },
-
+  {
+    id: "uuid-generator",
+    title: "UUID Generator",
+    description: "Generate version 4 UUIDs",
+    icon: Zap,
+    href: "/tools/uuid-generator",
+    category: "Generator",
+    featured: true
+  },
   {
     id: "html-formatter",
     title: "HTML Formatter",
