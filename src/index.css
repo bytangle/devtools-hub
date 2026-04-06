@@ -2,120 +2,138 @@
 @tailwind components;
 @tailwind utilities;
 
-/* DevTools Hub Design System - Modern, sleek, minimal */
+/* DevTools Hub Design System - Engineering/Terminal Aesthetic */
 
 @layer base {
   :root {
-    --background: 250 100% 99%;
-    --foreground: 240 10% 3.9%;
+    /* Light mode - Clean engineering look */
+    --background: 220 14% 96%;
+    --foreground: 220 13% 13%;
     
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 220 13% 13%;
     
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
+    --popover-foreground: 220 13% 13%;
     
-    --primary: 270 95% 65%;
-    --primary-glow: 270 100% 75%;
-    --primary-foreground: 0 0% 100%;
+    /* Cyan/Teal primary - Engineering feel */
+    --primary: 172 66% 50%;
+    --primary-glow: 172 80% 55%;
+    --primary-foreground: 220 13% 10%;
     
-    --secondary: 240 5% 96%;
-    --secondary-foreground: 240 10% 3.9%;
+    --secondary: 220 14% 92%;
+    --secondary-foreground: 220 13% 13%;
     
-    --muted: 240 5% 96%;
-    --muted-foreground: 240 4% 46%;
+    --muted: 220 14% 92%;
+    --muted-foreground: 220 9% 46%;
     
-    --accent: 240 5% 96%;
-    --accent-foreground: 240 10% 3.9%;
+    --accent: 172 30% 94%;
+    --accent-foreground: 220 13% 13%;
     
-    --destructive: 0 85% 60%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
     
-    --border: 240 6% 90%;
-    --input: 240 6% 90%;
-    --ring: 270 95% 65%;
+    --border: 220 13% 86%;
+    --input: 220 13% 86%;
+    --ring: 172 66% 50%;
     
-    --success: 142 76% 36%;
-    --warning: 45 93% 47%;
-    --info: 217 91% 60%;
+    /* Terminal-style status colors */
+    --success: 142 71% 45%;
+    --warning: 38 92% 50%;
+    --info: 199 89% 48%;
+    --error: 0 72% 51%;
     
-    --gradient-primary: linear-gradient(135deg, hsl(270 95% 65%), hsl(280 100% 70%));
-    --gradient-hero: linear-gradient(135deg, hsl(270 95% 65%) 0%, hsl(280 100% 70%) 50%, hsl(290 95% 75%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(240 10% 98%) 100%);
+    /* Engineering gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(172 66% 50%), hsl(187 80% 48%));
+    --gradient-hero: linear-gradient(135deg, hsl(220 14% 10%) 0%, hsl(220 13% 18%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(220 14% 97%) 100%);
+    --gradient-grid: linear-gradient(hsl(172 66% 50% / 0.03) 1px, transparent 1px),
+                     linear-gradient(90deg, hsl(172 66% 50% / 0.03) 1px, transparent 1px);
     
-    --shadow-sm: 0 1px 2px 0 hsl(240 10% 3.9% / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(240 10% 3.9% / 0.1), 0 2px 4px -1px hsl(240 10% 3.9% / 0.06);
-    --shadow-lg: 0 10px 15px -3px hsl(240 10% 3.9% / 0.1), 0 4px 6px -2px hsl(240 10% 3.9% / 0.05);
-    --shadow-glow: 0 0 20px hsl(270 95% 65% / 0.3);
+    /* Sharper shadows for technical look */
+    --shadow-sm: 0 1px 2px 0 hsl(220 13% 13% / 0.04);
+    --shadow-md: 0 2px 4px -1px hsl(220 13% 13% / 0.06), 0 1px 2px -1px hsl(220 13% 13% / 0.03);
+    --shadow-lg: 0 4px 6px -2px hsl(220 13% 13% / 0.08), 0 2px 4px -2px hsl(220 13% 13% / 0.04);
+    --shadow-glow: 0 0 20px hsl(172 66% 50% / 0.25);
     
-    --transition-base: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     
-    --radius: 0.75rem;
+    /* Sharper corners for engineering look */
+    --radius: 0.375rem;
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 220 14% 98%;
+    --sidebar-foreground: 220 13% 26%;
+    --sidebar-primary: 172 66% 50%;
+    --sidebar-primary-foreground: 220 13% 10%;
+    --sidebar-accent: 220 14% 95%;
+    --sidebar-accent-foreground: 220 13% 13%;
+    --sidebar-border: 220 13% 90%;
+    --sidebar-ring: 172 66% 50%;
+    
+    /* Code/Terminal specific */
+    --code-bg: 220 14% 95%;
+    --code-border: 220 13% 88%;
+    --terminal-green: 142 71% 45%;
+    --terminal-cyan: 187 89% 53%;
+    --terminal-amber: 38 92% 50%;
   }
 
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
+    /* Dark mode - True terminal/IDE aesthetic */
+    --background: 220 13% 8%;
+    --foreground: 220 14% 93%;
     
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
+    --card: 220 13% 11%;
+    --card-foreground: 220 14% 93%;
     
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 220 13% 11%;
+    --popover-foreground: 220 14% 93%;
     
-    --primary: 270 95% 65%;
-    --primary-glow: 270 100% 75%;
-    --primary-foreground: 0 0% 98%;
+    /* Bright cyan primary */
+    --primary: 172 66% 50%;
+    --primary-glow: 172 80% 60%;
+    --primary-foreground: 220 13% 8%;
     
-    --secondary: 240 4% 16%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 220 13% 15%;
+    --secondary-foreground: 220 14% 93%;
     
-    --muted: 240 4% 16%;
-    --muted-foreground: 240 5% 65%;
+    --muted: 220 13% 15%;
+    --muted-foreground: 220 9% 60%;
     
-    --accent: 240 4% 16%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 220 13% 18%;
+    --accent-foreground: 220 14% 93%;
     
-    --destructive: 0 75% 60%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
     
-    --border: 240 4% 16%;
-    --input: 240 4% 16%;
-    --ring: 270 95% 65%;
+    --border: 220 13% 18%;
+    --input: 220 13% 18%;
+    --ring: 172 66% 50%;
     
-    --gradient-primary: linear-gradient(135deg, hsl(270 95% 65%), hsl(280 100% 70%));
-    --gradient-hero: linear-gradient(135deg, hsl(270 95% 65%) 0%, hsl(280 100% 70%) 50%, hsl(290 95% 75%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(240 10% 3.9%) 0%, hsl(240 8% 8%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(172 66% 50%), hsl(187 80% 48%));
+    --gradient-hero: linear-gradient(135deg, hsl(220 13% 6%) 0%, hsl(220 13% 12%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(220 13% 11%) 0%, hsl(220 13% 14%) 100%);
     
-    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.06);
-    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.1), 0 4px 6px -2px hsl(0 0% 0% / 0.05);
-    --shadow-glow: 0 0 20px hsl(270 95% 65% / 0.4);
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.3);
+    --shadow-md: 0 2px 4px -1px hsl(0 0% 0% / 0.4);
+    --shadow-lg: 0 4px 6px -2px hsl(0 0% 0% / 0.5);
+    --shadow-glow: 0 0 30px hsl(172 66% 50% / 0.3);
+    
+    --sidebar-background: 220 13% 6%;
+    --sidebar-foreground: 220 14% 85%;
+    --sidebar-primary: 172 66% 50%;
+    --sidebar-primary-foreground: 220 13% 8%;
+    --sidebar-accent: 220 13% 12%;
+    --sidebar-accent-foreground: 220 14% 93%;
+    --sidebar-border: 220 13% 15%;
+    --sidebar-ring: 172 66% 50%;
+    
+    --code-bg: 220 13% 6%;
+    --code-border: 220 13% 18%;
+    --terminal-green: 142 71% 50%;
+    --terminal-cyan: 187 89% 58%;
+    --terminal-amber: 38 92% 55%;
   }
 }
 
@@ -125,12 +143,93 @@
   }
 
   body {
-    @apply bg-background text-foreground font-inter;
+    @apply bg-background text-foreground;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
-    line-height: 1.6;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   
   html {
     scroll-behavior: smooth;
+  }
+  
+  /* Monospace for code elements */
+  code, pre, kbd, .font-mono {
+    font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, Monaco, Consolas, monospace;
+  }
+}
+
+/* Engineering-specific utility classes */
+@layer components {
+  /* Terminal-style code blocks */
+  .terminal-block {
+    @apply bg-[hsl(var(--code-bg))] border border-[hsl(var(--code-border))] rounded font-mono text-sm;
+    box-shadow: inset 0 1px 2px hsl(0 0% 0% / 0.1);
+  }
+  
+  /* Grid background pattern */
+  .grid-pattern {
+    background-image: var(--gradient-grid);
+    background-size: 24px 24px;
+  }
+  
+  /* Glow effect for interactive elements */
+  .glow-effect {
+    transition: box-shadow 0.2s ease;
+  }
+  .glow-effect:hover {
+    box-shadow: var(--shadow-glow);
+  }
+  
+  /* Status indicators */
+  .status-dot {
+    @apply w-2 h-2 rounded-full;
+  }
+  .status-dot.success { @apply bg-[hsl(var(--success))]; }
+  .status-dot.warning { @apply bg-[hsl(var(--warning))]; }
+  .status-dot.error { @apply bg-[hsl(var(--error))]; }
+  .status-dot.info { @apply bg-[hsl(var(--info))]; }
+  
+  /* Terminal prompt style */
+  .terminal-prompt::before {
+    content: '$ ';
+    @apply text-[hsl(var(--terminal-green))] font-bold;
+  }
+  
+  /* Engineering badge */
+  .engineering-badge {
+    @apply px-2 py-0.5 text-xs font-mono font-medium rounded;
+    @apply bg-primary/10 text-primary border border-primary/20;
+  }
+  
+  /* Keyboard shortcut styling */
+  .kbd {
+    @apply inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-mono font-medium;
+    @apply bg-muted border border-border rounded shadow-sm;
+    min-width: 1.25rem;
+  }
+  
+  /* Code highlight */
+  .code-highlight {
+    @apply px-1 py-0.5 rounded text-sm font-mono;
+    @apply bg-primary/10 text-primary;
+  }
+  
+  /* Panel styling */
+  .panel {
+    @apply bg-card border border-border rounded-lg;
+    @apply shadow-sm;
+  }
+  
+  /* Divider with label */
+  .divider-label {
+    @apply flex items-center gap-3 text-xs text-muted-foreground uppercase tracking-wider;
+  }
+  .divider-label::before,
+  .divider-label::after {
+    content: '';
+    @apply flex-1 h-px bg-border;
   }
 }

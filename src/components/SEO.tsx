@@ -6,6 +6,7 @@ interface SEOProps {
   keywords?: string;
   canonicalUrl?: string;
   type?: 'website' | 'article';
+  jsonLd?: Record<string, unknown>;
 }
 
 export const SEO = ({ 
@@ -13,11 +14,13 @@ export const SEO = ({
   description, 
   keywords,
   canonicalUrl,
-  type = 'website'
+  type = 'website',
+  jsonLd,
 }: SEOProps) => {
   const fullTitle = title.includes('DevTools Hub') ? title : `${title} - DevTools Hub`;
-  const siteUrl = window.location.origin;
-  const fullCanonicalUrl = canonicalUrl ? `${siteUrl}${canonicalUrl}` : window.location.href;
+  const siteUrl = typeof window !== 'undefined' ? window.location.origin : 'https://devtools-hub.com';
+  const ogImage = 'https://dev-tools-hub.s3.us-east-1.amazonaws.com/og.png';
+  const fullCanonicalUrl = canonicalUrl ? `${siteUrl}${canonicalUrl}` : (typeof window !== 'undefined' ? window.location.href : siteUrl);
 
   return (
     <Helmet>
@@ -32,15 +35,26 @@ export const SEO = ({
       <meta property="og:type" content={type} />
       <meta property="og:url" content={fullCanonicalUrl} />
       <meta property="og:site_name" content="DevTools Hub" />
+      <meta property="og:image" content={ogImage} />
+      <meta property="og:locale" content="en_US" />
       
       {/* Twitter */}
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:site" content="@bytangle" />
+      <meta name="twitter:image" content={ogImage} />
       
       {/* Additional SEO */}
-      <meta name="robots" content="index, follow" />
+      <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
       <meta name="author" content="DevTools Hub" />
+
+      {/* JSON-LD Structured Data */}
+      {jsonLd && (
+        <script type="application/ld+json">
+          {JSON.stringify(jsonLd)}
+        </script>
+      )}
     </Helmet>
   );
 };

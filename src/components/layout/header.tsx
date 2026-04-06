@@ -50,6 +50,9 @@ export function Header() {
             <Button variant="ghost" size="sm" asChild>
               <Link to="/generators">Generators</Link>
             </Button>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/blog">Blog</Link>
+            </Button>
           </nav>
           <ThemeToggle />
         </div>

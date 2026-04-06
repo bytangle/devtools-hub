@@ -1,5 +1,12 @@
 {
   "rewrites": [
+    { "source": "/tools/:toolId", "destination": "/tools/:toolId/index.html" },
+    { "source": "/blog/:slug", "destination": "/blog/:slug/index.html" },
+    { "source": "/blog", "destination": "/blog/index.html" },
+    { "source": "/formatters", "destination": "/formatters/index.html" },
+    { "source": "/validators", "destination": "/validators/index.html" },
+    { "source": "/converters", "destination": "/converters/index.html" },
+    { "source": "/generators", "destination": "/generators/index.html" },
     { "source": "/(.*)", "destination": "/" }
   ]
 }
