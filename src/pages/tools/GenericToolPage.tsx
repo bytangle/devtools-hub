@@ -108,7 +108,7 @@ export default function GenericToolPage() {
     "@type": "WebApplication",
     "name": tool.title,
     "description": tool.description,
-    "url": `https://devtools-hub.com${tool.href}`,
+    "url": `https://thedevtoolshub.com${tool.href}`,
     "applicationCategory": "DeveloperApplication",
     "operatingSystem": "All",
     "offers": {
@@ -119,7 +119,7 @@ export default function GenericToolPage() {
     "isPartOf": {
       "@type": "WebSite",
       "name": "DevTools Hub",
-      "url": "https://devtools-hub.com"
+      "url": "https://thedevtoolshub.com"
     }
   }
 
@@ -131,19 +131,19 @@ export default function GenericToolPage() {
         "@type": "ListItem",
         "position": 1,
         "name": "DevTools Hub",
-        "item": "https://devtools-hub.com"
+        "item": "https://thedevtoolshub.com"
       },
       {
         "@type": "ListItem",
         "position": 2,
         "name": `${tool.category}s`,
-        "item": `https://devtools-hub.com/${tool.category.toLowerCase()}s`
+        "item": `https://thedevtoolshub.com/${tool.category.toLowerCase()}s`
       },
       {
         "@type": "ListItem",
         "position": 3,
         "name": tool.title,
-        "item": `https://devtools-hub.com${tool.href}`
+        "item": `https://thedevtoolshub.com${tool.href}`
       }
     ]
   }

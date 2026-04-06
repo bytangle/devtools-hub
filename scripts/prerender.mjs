@@ -14,7 +14,7 @@ import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const DIST = join(__dirname, '..', 'dist')
-const SITE_URL = 'https://devtools-hub.com'
+const SITE_URL = 'https://thedevtoolshub.com'
 const OG_IMAGE = 'https://dev-tools-hub.s3.us-east-1.amazonaws.com/og.png'
 
 // Read the built index.html as the template

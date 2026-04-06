@@ -68,15 +68,15 @@ export default function BlogPost() {
     "author": {
       "@type": "Organization",
       "name": "DevTools Hub",
-      "url": "https://devtools-hub.com"
+      "url": "https://thedevtoolshub.com"
     },
     "publisher": {
       "@type": "Organization",
       "name": "DevTools Hub",
-      "url": "https://devtools-hub.com",
+      "url": "https://thedevtoolshub.com",
       "logo": { "@type": "ImageObject", "url": "https://dev-tools-hub.s3.us-east-1.amazonaws.com/og.png" }
     },
-    "mainEntityOfPage": `https://devtools-hub.com/blog/${post.slug}`,
+    "mainEntityOfPage": `https://thedevtoolshub.com/blog/${post.slug}`,
     "keywords": post.keywords.join(", "),
     "wordCount": post.content.split(/\s+/).length,
     "timeRequired": `PT${post.readingTime}M`
@@ -86,9 +86,9 @@ export default function BlogPost() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "DevTools Hub", "item": "https://devtools-hub.com" },
-      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://devtools-hub.com/blog" },
-      { "@type": "ListItem", "position": 3, "name": post.title, "item": `https://devtools-hub.com/blog/${post.slug}` }
+      { "@type": "ListItem", "position": 1, "name": "DevTools Hub", "item": "https://thedevtoolshub.com" },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://thedevtoolshub.com/blog" },
+      { "@type": "ListItem", "position": 3, "name": post.title, "item": `https://thedevtoolshub.com/blog/${post.slug}` }
     ]
   }
 

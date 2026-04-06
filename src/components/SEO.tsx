@@ -18,7 +18,7 @@ export const SEO = ({
   jsonLd,
 }: SEOProps) => {
   const fullTitle = title.includes('DevTools Hub') ? title : `${title} - DevTools Hub`;
-  const siteUrl = typeof window !== 'undefined' ? window.location.origin : 'https://devtools-hub.com';
+  const siteUrl = typeof window !== 'undefined' ? window.location.origin : 'https://thedevtoolshub.com';
   const ogImage = 'https://dev-tools-hub.s3.us-east-1.amazonaws.com/og.png';
   const fullCanonicalUrl = canonicalUrl ? `${siteUrl}${canonicalUrl}` : (typeof window !== 'undefined' ? window.location.href : siteUrl);
 

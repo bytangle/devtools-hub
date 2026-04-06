@@ -78,7 +78,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     Sitemap({
-      hostname: "https://devtools-hub.com",
+      hostname: "https://thedevtoolshub.com",
       dynamicRoutes: [
         "/",
         "/home",
