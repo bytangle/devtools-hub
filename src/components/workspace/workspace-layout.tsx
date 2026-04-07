@@ -123,7 +123,7 @@ function EmptyState() {
           </div>
           <div className="space-y-2">
             <h2 className="text-xl font-mono font-bold">
-              <span className="text-primary">$</span> devtools_hub <span className="animate-pulse">_</span>
+              <span className="text-primary">$</span> devv.tools <span className="animate-pulse">_</span>
             </h2>
             <p className="text-sm text-muted-foreground font-mono">
               // Developer utilities at your fingertips

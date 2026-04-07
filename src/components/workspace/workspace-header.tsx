@@ -80,7 +80,7 @@ export function WorkspaceHeader() {
         </div>
         <div className="hidden sm:flex flex-col leading-none">
           <span className="text-sm font-mono font-bold text-foreground">
-            devtools<span className="text-primary">_</span>hub
+            devv<span className="text-primary">.</span>tools
           </span>
           <span className="text-[10px] font-mono text-muted-foreground">
             v2.0
