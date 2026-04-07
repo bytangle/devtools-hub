@@ -20,7 +20,7 @@ export function Header() {
               <Code2 className="h-5 w-5 text-white" />
             </div>
             <span className="text-lg font-semibold bg-gradient-primary bg-clip-text text-transparent">
-              DevTools Hub
+              devv.tools
             </span>
           </Link>
         </div>
