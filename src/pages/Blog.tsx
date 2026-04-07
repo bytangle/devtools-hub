@@ -12,11 +12,11 @@ export default function Blog() {
     "@type": "Blog",
     "name": "DevTools Hub Blog",
     "description": "Developer guides, tutorials, and best practices for using online developer tools.",
-    "url": "https://thedevtoolshub.com/blog",
+    "url": "https://devv.tools/blog",
     "publisher": {
       "@type": "Organization",
       "name": "DevTools Hub",
-      "url": "https://thedevtoolshub.com"
+      "url": "https://devv.tools"
     },
     "blogPost": blogPosts.map(post => ({
       "@type": "BlogPosting",
@@ -24,7 +24,7 @@ export default function Blog() {
       "description": post.description,
       "datePublished": post.publishedAt,
       "dateModified": post.updatedAt,
-      "url": `https://thedevtoolshub.com/blog/${post.slug}`,
+      "url": `https://devv.tools/blog/${post.slug}`,
       "author": { "@type": "Organization", "name": "DevTools Hub" }
     }))
   }
