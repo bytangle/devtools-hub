@@ -1,6 +1,6 @@
 # Development Workflow
 
-This skill covers the development workflow, commands, and common tasks for DevTools Hub.
+This skill covers the development workflow, commands, and common tasks for devv.tools.
 
 ## Getting Started
 

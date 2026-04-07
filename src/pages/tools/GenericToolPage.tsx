@@ -43,7 +43,7 @@ export default function GenericToolPage() {
     },
     "isPartOf": {
       "@type": "WebSite",
-      "name": "DevTools Hub",
+      "name": "devv.tools",
       "url": "https://devv.tools"
     }
   }
@@ -55,7 +55,7 @@ export default function GenericToolPage() {
       {
         "@type": "ListItem",
         "position": 1,
-        "name": "DevTools Hub",
+        "name": "devv.tools",
         "item": "https://devv.tools"
       },
       {

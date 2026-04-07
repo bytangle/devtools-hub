@@ -1,6 +1,6 @@
 # Tool Data Management
 
-This skill covers how tool metadata is structured and used throughout DevTools Hub.
+This skill covers how tool metadata is structured and used throughout devv.tools.
 
 ## Tools Data File
 

@@ -1,10 +1,10 @@
 # Project Architecture Overview
 
-This skill provides a comprehensive overview of the DevTools Hub architecture.
+This skill provides a comprehensive overview of the devv.tools architecture.
 
-## What is DevTools Hub?
+## What is devv.tools?
 
-DevTools Hub is a collection of free, browser-based developer tools. It provides utilities for:
+devv.tools is a collection of free, browser-based developer tools. It provides utilities for:
 
 - **Formatting** code (JSON, HTML, CSS, SQL)
 - **Validating** syntax (JSON, HTML, CSS)

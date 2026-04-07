@@ -1,10 +1,10 @@
 # Adding a New Developer Tool
 
-This skill guides you through adding a new tool to DevTools Hub. Follow this pattern to ensure consistency across the codebase.
+This skill guides you through adding a new tool to devv.tools. Follow this pattern to ensure consistency across the codebase.
 
 ## Overview
 
-DevTools Hub is a React/TypeScript/Vite application with ShadCN UI components. Each tool follows a consistent structure with:
+devv.tools is a React/TypeScript/Vite application with ShadCN UI components. Each tool follows a consistent structure with:
 - A dedicated page component in `src/pages/tools/`
 - An entry in `src/data/tools.ts`
 - A route in `src/App.tsx`

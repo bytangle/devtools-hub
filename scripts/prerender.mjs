@@ -89,7 +89,7 @@ function escapeHtml(str) {
 }
 
 function generateToolHtml(tool) {
-  const title = `${tool.title} - Free Online ${tool.cat} Tool - DevTools Hub`
+  const title = `${tool.title} - Free Online ${tool.cat} Tool - devv.tools`
   const url = `${SITE_URL}/tools/${tool.id}`
 
   const jsonLd = JSON.stringify({
@@ -101,14 +101,14 @@ function generateToolHtml(tool) {
     "applicationCategory": "DeveloperApplication",
     "operatingSystem": "All",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-    "isPartOf": { "@type": "WebSite", "name": "DevTools Hub", "url": SITE_URL }
+    "isPartOf": { "@type": "WebSite", "name": "devv.tools", "url": SITE_URL }
   })
 
   const breadcrumbLd = JSON.stringify({
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "DevTools Hub", "item": SITE_URL },
+      { "@type": "ListItem", "position": 1, "name": "devv.tools", "item": SITE_URL },
       { "@type": "ListItem", "position": 2, "name": `${tool.cat}s`, "item": `${SITE_URL}/${tool.cat.toLowerCase()}s` },
       { "@type": "ListItem", "position": 3, "name": tool.title, "item": url }
     ]
@@ -149,7 +149,7 @@ function generateToolHtml(tool) {
 }
 
 function generateBlogHtml(post) {
-  const title = `${post.title} - DevTools Hub`
+  const title = `${post.title} - devv.tools`
   const url = `${SITE_URL}/blog/${post.slug}`
 
   const jsonLd = JSON.stringify({
@@ -158,8 +158,8 @@ function generateBlogHtml(post) {
     "headline": post.title,
     "description": post.desc,
     "url": url,
-    "author": { "@type": "Organization", "name": "DevTools Hub" },
-    "publisher": { "@type": "Organization", "name": "DevTools Hub", "url": SITE_URL }
+    "author": { "@type": "Organization", "name": "devv.tools" },
+    "publisher": { "@type": "Organization", "name": "devv.tools", "url": SITE_URL }
   })
 
   const seoContent = `
@@ -208,7 +208,7 @@ ensureDir(blogDir)
 
 // Blog index
 const blogIndexHtml = template
-  .replace(/<title>[^<]*<\/title>/, '<title>Developer Blog: Guides, Tutorials & Best Practices - DevTools Hub</title>')
+  .replace(/<title>[^<]*<\/title>/, '<title>Developer Blog: Guides, Tutorials & Best Practices - devv.tools</title>')
   .replace(/<meta name="description" content="[^"]*"/, '<meta name="description" content="Learn about JSON formatting, password security, Base64 encoding, regex patterns, JWT tokens, and more. Free developer guides."')
   .replace(/<link rel="canonical" href="[^"]*"/, `<link rel="canonical" href="${SITE_URL}/blog"`)
   .replace('<div id="root"></div>', `<div id="root"></div>
@@ -235,7 +235,7 @@ for (const cat of categories) {
   const catTitle = cat.charAt(0).toUpperCase() + cat.slice(1)
   const catTools = tools.filter(t => t.cat.toLowerCase() + 's' === cat)
   const catHtml = template
-    .replace(/<title>[^<]*<\/title>/, `<title>${catTitle} - Free Online Developer Tools - DevTools Hub</title>`)
+    .replace(/<title>[^<]*<\/title>/, `<title>${catTitle} - Free Online Developer Tools - devv.tools</title>`)
     .replace(/<meta name="description" content="[^"]*"/, `<meta name="description" content="Free online ${cat} tools for developers. ${catTools.map(t => t.title).slice(0, 5).join(', ')}, and more."`)
     .replace(/<link rel="canonical" href="[^"]*"/, `<link rel="canonical" href="${SITE_URL}/${cat}"`)
     .replace('<div id="root"></div>', `<div id="root"></div>

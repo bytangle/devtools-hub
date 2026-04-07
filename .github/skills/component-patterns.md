@@ -1,10 +1,10 @@
 # Component Patterns and Conventions
 
-This skill covers the UI component patterns and conventions used in DevTools Hub.
+This skill covers the UI component patterns and conventions used in devv.tools.
 
 ## Component Library
 
-DevTools Hub uses ShadCN UI components built on Radix primitives with Tailwind CSS styling. Components are located in `src/components/ui/`.
+devv.tools uses ShadCN UI components built on Radix primitives with Tailwind CSS styling. Components are located in `src/components/ui/`.
 
 ## Core Custom Components
 

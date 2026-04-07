@@ -67,12 +67,12 @@ export default function BlogPost() {
     "dateModified": post.updatedAt,
     "author": {
       "@type": "Organization",
-      "name": "DevTools Hub",
+      "name": "devv.tools",
       "url": "https://devv.tools"
     },
     "publisher": {
       "@type": "Organization",
-      "name": "DevTools Hub",
+      "name": "devv.tools",
       "url": "https://devv.tools",
       "logo": { "@type": "ImageObject", "url": "https://dev-tools-hub.s3.us-east-1.amazonaws.com/og.png" }
     },
@@ -86,7 +86,7 @@ export default function BlogPost() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "DevTools Hub", "item": "https://devv.tools" },
+      { "@type": "ListItem", "position": 1, "name": "devv.tools", "item": "https://devv.tools" },
       { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://devv.tools/blog" },
       { "@type": "ListItem", "position": 3, "name": post.title, "item": `https://devv.tools/blog/${post.slug}` }
     ]

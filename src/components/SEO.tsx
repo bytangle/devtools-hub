@@ -17,7 +17,7 @@ export const SEO = ({
   type = 'website',
   jsonLd,
 }: SEOProps) => {
-  const fullTitle = title.includes('DevTools Hub') ? title : `${title} - DevTools Hub`;
+  const fullTitle = title.includes('devv.tools') ? title : `${title} - devv.tools`;
   const siteUrl = typeof window !== 'undefined' ? window.location.origin : 'https://devv.tools';
   const ogImage = 'https://dev-tools-hub.s3.us-east-1.amazonaws.com/og.png';
   const fullCanonicalUrl = canonicalUrl ? `${siteUrl}${canonicalUrl}` : (typeof window !== 'undefined' ? window.location.href : siteUrl);
@@ -34,7 +34,7 @@ export const SEO = ({
       <meta property="og:description" content={description} />
       <meta property="og:type" content={type} />
       <meta property="og:url" content={fullCanonicalUrl} />
-      <meta property="og:site_name" content="DevTools Hub" />
+      <meta property="og:site_name" content="devv.tools" />
       <meta property="og:image" content={ogImage} />
       <meta property="og:locale" content="en_US" />
       
@@ -47,7 +47,7 @@ export const SEO = ({
       
       {/* Additional SEO */}
       <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
-      <meta name="author" content="DevTools Hub" />
+      <meta name="author" content="devv.tools" />
 
       {/* JSON-LD Structured Data */}
       {jsonLd && (

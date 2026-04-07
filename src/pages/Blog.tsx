@@ -10,12 +10,12 @@ export default function Blog() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Blog",
-    "name": "DevTools Hub Blog",
+    "name": "devv.tools Blog",
     "description": "Developer guides, tutorials, and best practices for using online developer tools.",
     "url": "https://devv.tools/blog",
     "publisher": {
       "@type": "Organization",
-      "name": "DevTools Hub",
+      "name": "devv.tools",
       "url": "https://devv.tools"
     },
     "blogPost": blogPosts.map(post => ({
@@ -25,14 +25,14 @@ export default function Blog() {
       "datePublished": post.publishedAt,
       "dateModified": post.updatedAt,
       "url": `https://devv.tools/blog/${post.slug}`,
-      "author": { "@type": "Organization", "name": "DevTools Hub" }
+      "author": { "@type": "Organization", "name": "devv.tools" }
     }))
   }
 
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Developer Blog: Guides, Tutorials & Best Practices - DevTools Hub"
+        title="Developer Blog: Guides, Tutorials & Best Practices - devv.tools"
         description="Learn about JSON formatting, password security, Base64 encoding, regex patterns, JWT tokens, and more. Free developer guides with practical examples."
         keywords="developer blog, programming tutorials, json guide, regex tutorial, jwt explained, coding best practices"
         canonicalUrl="/blog"

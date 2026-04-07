@@ -1,6 +1,6 @@
 # SEO Guidelines and Best Practices
 
-This skill covers SEO implementation for DevTools Hub tool pages.
+This skill covers SEO implementation for devv.tools tool pages.
 
 ## SEO Component
 
@@ -21,9 +21,9 @@ import { SEO } from "@/components/SEO"
 ## Title Best Practices
 
 ### Format
-`Tool Name - Action Description | DevTools Hub`
+`Tool Name - Action Description | devv.tools`
 
-The component auto-appends "- DevTools Hub" if not present.
+The component auto-appends "- devv.tools" if not present.
 
 ### Examples
 - ✅ "JSON Formatter & Beautifier - Format and Validate JSON Online"
@@ -99,7 +99,7 @@ The SEO component generates:
 <meta property="og:description" content="{description}" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="{fullCanonicalUrl}" />
-<meta property="og:site_name" content="DevTools Hub" />
+<meta property="og:site_name" content="devv.tools" />
 
 <!-- Twitter -->
 <meta name="twitter:title" content="{fullTitle}" />
@@ -108,7 +108,7 @@ The SEO component generates:
 
 <!-- Additional -->
 <meta name="robots" content="index, follow" />
-<meta name="author" content="DevTools Hub" />
+<meta name="author" content="devv.tools" />
 ```
 
 ## Page Content SEO
@@ -173,7 +173,7 @@ Category pages should also have proper SEO:
 
 ```tsx
 <SEO 
-  title="DevTools Hub - Code Formatter, JSON Beautifier & Developer Utilities"
+  title="devv.tools - Code Formatter, JSON Beautifier & Developer Utilities"
   description="Professional developer tools including JSON formatter, code beautifier, XML viewer, base64 converter and more. Clean, fast, and free online utilities."
   keywords="json formatter, code beautifier, developer tools, base64 converter, html formatter, css minifier, password generator, regex tester"
   canonicalUrl="/"

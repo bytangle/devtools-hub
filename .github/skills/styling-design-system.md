@@ -1,6 +1,6 @@
 # Styling and Design System
 
-This skill covers the styling conventions, design tokens, and Tailwind CSS usage in DevTools Hub.
+This skill covers the styling conventions, design tokens, and Tailwind CSS usage in devv.tools.
 
 ## Tech Stack
 
@@ -149,7 +149,7 @@ export default {
 
 // Gradient text
 <h1 className="bg-gradient-primary bg-clip-text text-transparent">
-  DevTools Hub
+  devv.tools
 </h1>
 
 // Hero section background

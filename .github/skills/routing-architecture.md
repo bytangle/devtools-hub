@@ -1,6 +1,6 @@
 # Routing Architecture
 
-This skill explains the routing structure and navigation in DevTools Hub.
+This skill explains the routing structure and navigation in devv.tools.
 
 ## Tech Stack
 

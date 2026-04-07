@@ -17,7 +17,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO 
-        title="DevTools Hub - Code Formatter, JSON Beautifier & Developer Utilities"
+        title="devv.tools - Code Formatter, JSON Beautifier & Developer Utilities"
         description="Professional developer tools including JSON formatter, code beautifier, XML viewer, base64 converter and more. Clean, fast, and free online utilities."
         keywords="json formatter, code beautifier, developer tools, base64 converter, html formatter, css minifier, password generator, regex tester"
         canonicalUrl="/"
@@ -33,7 +33,7 @@ const Index = () => {
               Professional Developer Tools
             </Badge>
             <h1 className="text-4xl font-bold tracking-tight sm:text-6xl bg-gradient-primary bg-clip-text text-transparent">
-              DevTools Hub
+              devv.tools
             </h1>
             <p className="text-lg text-muted-foreground sm:text-xl leading-relaxed">
               Code Formatter, JSON Beautifier, Validators & More
