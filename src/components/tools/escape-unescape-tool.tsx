@@ -1,13 +1,13 @@
 import { useState, useEffect, useMemo } from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Textarea } from "@/components/ui/textarea"
+import { CodeEditor } from "@/components/ui/code-editor"
 import { Button } from "@/components/ui/button"
-import { Code, Copy, ArrowLeftRight } from "lucide-react"
+import { ToolShell, TwoPanelLayout } from "@/components/tools/shared/tool-shell"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Code, ArrowLeftRight, Trash2 } from "lucide-react"
 import { ToolComponentProps } from "@/components/workspace/tool-panel"
 import { useWorkspace } from "@/context/workspace-context"
 import { useToast } from "@/hooks/use-toast"
-import { Label } from "@/components/ui/label"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 type EscapeType = 'html' | 'url' | 'json' | 'unicode' | 'base64' | 'backslash'
@@ -135,7 +135,7 @@ export function EscapeUnescapeTool({ tabId, initialInput, onOutputChange }: Tool
   
   const [mode, setMode] = useState<'escape' | 'unescape'>(savedState?.mode || 'escape')
   const [escapeType, setEscapeType] = useState<EscapeType>(savedState?.escapeType as EscapeType || 'html')
-  const [input, setInput] = useState(savedState?.input as string || initialInput || '<script>alert("Hello & World!")</script>')
+  const [input, setInput] = useState(initialInput || savedState?.input as string || '<script>alert("Hello & World!")</script>')
 
   const output = useMemo(() => {
     try {
@@ -155,111 +155,58 @@ export function EscapeUnescapeTool({ tabId, initialInput, onOutputChange }: Tool
     }
   }, [output, onOutputChange])
 
-  const copyOutput = async () => {
-    await navigator.clipboard.writeText(output)
-    toast({ title: "Copied to clipboard" })
-  }
-
   const swap = () => {
     setInput(output)
     setMode(mode === 'escape' ? 'unescape' : 'escape')
   }
 
   return (
-    <div className="space-y-4 p-4">
-      <div className="flex items-center gap-2">
-        <Code className="h-5 w-5 text-primary" />
-        <h2 className="text-lg font-semibold font-mono">escape_unescape</h2>
-      </div>
-
-      <Card>
-        <CardContent className="p-3 flex flex-wrap items-center gap-3">
-          <Tabs value={mode} onValueChange={(v) => setMode(v as typeof mode)} className="w-auto">
-            <TabsList className="h-8">
-              <TabsTrigger value="escape" className="text-xs h-6 px-3">Escape</TabsTrigger>
-              <TabsTrigger value="unescape" className="text-xs h-6 px-3">Unescape</TabsTrigger>
-            </TabsList>
-          </Tabs>
-          
-          <Select value={escapeType} onValueChange={(v) => setEscapeType(v as EscapeType)}>
-            <SelectTrigger className="w-40 h-8">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {escapeTypes.map(t => (
-                <SelectItem key={t.id} value={t.id}>{t.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          
-          <Button size="sm" variant="outline" onClick={swap}>
-            <ArrowLeftRight className="h-3 w-3 mr-1" />
-            Swap
-          </Button>
-          
-          <Button size="sm" variant="outline" onClick={copyOutput}>
-            <Copy className="h-3 w-3 mr-1" />
-            Copy Output
-          </Button>
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <Label className="text-sm font-medium mb-2 block">Input</Label>
-            <Textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Enter text to escape/unescape..."
-              className="font-mono text-sm min-h-[200px]"
-            />
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <Label className="text-sm font-medium mb-2 block">Output</Label>
-            <Textarea
-              value={output}
-              readOnly
-              className="font-mono text-sm min-h-[200px] bg-muted/30"
-            />
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardContent className="p-4">
-          <Label className="text-sm font-medium mb-3 block">Quick Reference</Label>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
-            <div className="p-2 rounded bg-muted/30">
-              <div className="font-medium text-muted-foreground">HTML Entities</div>
-              <code>&lt; &gt; &amp; &quot;</code>
+    <ToolShell icon={Code} title="Escape / Unescape">
+      <TooltipProvider delayDuration={200}>
+        <TwoPanelLayout
+          toolbar={
+            <div className="flex flex-wrap items-center gap-3">
+              <Tabs value={mode} onValueChange={(v) => setMode(v as typeof mode)} className="w-auto">
+                <TabsList className="h-8">
+                  <TabsTrigger value="escape" className="text-xs h-6 px-3">Escape</TabsTrigger>
+                  <TabsTrigger value="unescape" className="text-xs h-6 px-3">Unescape</TabsTrigger>
+                </TabsList>
+              </Tabs>
+              <Select value={escapeType} onValueChange={(v) => setEscapeType(v as EscapeType)}>
+                <SelectTrigger className="w-40 h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {escapeTypes.map(t => (
+                    <SelectItem key={t.id} value={t.id}>{t.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <div className="p-2 rounded bg-muted/30">
-              <div className="font-medium text-muted-foreground">URL Encoding</div>
-              <code>%20 %3D %26 %3F</code>
-            </div>
-            <div className="p-2 rounded bg-muted/30">
-              <div className="font-medium text-muted-foreground">JSON String</div>
-              <code>\" \\ \n \t</code>
-            </div>
-            <div className="p-2 rounded bg-muted/30">
-              <div className="font-medium text-muted-foreground">Unicode</div>
-              <code>\u0041 = A</code>
-            </div>
-            <div className="p-2 rounded bg-muted/30">
-              <div className="font-medium text-muted-foreground">Base64</div>
-              <code>SGVsbG8= = Hello</code>
-            </div>
-            <div className="p-2 rounded bg-muted/30">
-              <div className="font-medium text-muted-foreground">Backslash</div>
-              <code>\n \r \t \\</code>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+          }
+          input={<CodeEditor value={input} onChange={setInput} placeholder="Enter text to escape/unescape..." language="text" title="Input" />}
+          actions={<>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="icon" onClick={swap} className="h-8 w-8 rounded-full bg-gradient-primary text-primary-foreground shadow-sm">
+                  <ArrowLeftRight className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right"><p>Swap</p></TooltipContent>
+            </Tooltip>
+            <div className="w-4 h-px md:w-px md:h-4 bg-border/60" />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="icon" variant="ghost" onClick={() => { setInput(""); setMode("escape") }} className="h-7 w-7 rounded-full text-muted-foreground">
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right"><p>Clear all</p></TooltipContent>
+            </Tooltip>
+          </>}
+          output={<CodeEditor value={output} onChange={() => {}} placeholder="Result..." language="text" title="Output" readOnly />}
+        />
+      </TooltipProvider>
+    </ToolShell>
   )
 }

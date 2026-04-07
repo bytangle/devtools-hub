@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react"
 import { CodeEditor } from "@/components/ui/code-editor"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { ArrowLeftRight, Copy, Download, Zap } from "lucide-react"
+import { ToolShell, TwoPanelLayout } from "@/components/tools/shared/tool-shell"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { ArrowLeftRight, Trash2, Zap } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { ToolComponentProps } from "@/components/workspace/tool-panel"
 import { useWorkspace } from "@/context/workspace-context"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 // YAML stringifier (JSON → YAML)
 function jsonToYaml(data: any, indent: number = 0): string {
@@ -107,7 +108,7 @@ function yamlToJson(yaml: string): any {
       const parent = current.obj
       const key = current.key
       
-      if (key !== null && parent[key] === undefined) {
+      if (key !== null && !Array.isArray(parent[key])) {
         parent[key] = []
       }
       
@@ -162,23 +163,27 @@ export function JsonYamlConverterTool({ tabId, initialInput, onOutputChange }: T
   const { toast } = useToast()
   
   const [mode, setMode] = useState<'json-to-yaml' | 'yaml-to-json'>(savedState?.mode || 'json-to-yaml')
-  const [jsonInput, setJsonInput] = useState(savedState?.jsonInput as string || `{
-  "server": {
-    "host": "localhost",
-    "port": 8080
-  },
-  "database": {
-    "driver": "postgres",
-    "connection": {
-      "host": "db.example.com",
-      "port": 5432
-    }
-  },
-  "features": ["auth", "logging", "cache"]
-}`)
-  const [yamlInput, setYamlInput] = useState(savedState?.yamlInput as string || '')
+  const [jsonInput, setJsonInput] = useState(() => {
+    if (initialInput && (!savedState?.mode || savedState?.mode === 'json-to-yaml')) return initialInput
+    return savedState?.jsonInput as string || ''
+  })
+  const [yamlInput, setYamlInput] = useState(() => {
+    if (initialInput && savedState?.mode === 'yaml-to-json') return initialInput
+    return savedState?.yamlInput as string || ''
+  })
   const [output, setOutput] = useState('')
   const [error, setError] = useState<string | null>(null)
+
+  // Update the correct input when initialInput changes (for pipeline chaining)
+  useEffect(() => {
+    if (initialInput) {
+      if (mode === 'json-to-yaml') {
+        setJsonInput(initialInput)
+      } else {
+        setYamlInput(initialInput)
+      }
+    }
+  }, [initialInput, mode])
 
   useEffect(() => {
     setToolState(tabId, { jsonInput, yamlInput, mode })
@@ -218,77 +223,64 @@ export function JsonYamlConverterTool({ tabId, initialInput, onOutputChange }: T
     }
   }
 
-  const copyOutput = async () => {
-    await navigator.clipboard.writeText(output)
-    toast({ title: "Copied to clipboard" })
-  }
-
-  const downloadOutput = () => {
-    const ext = mode === 'json-to-yaml' ? 'yaml' : 'json'
-    const type = mode === 'json-to-yaml' ? 'text/yaml' : 'application/json'
-    const blob = new Blob([output], { type })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `converted.${ext}`
-    a.click()
-    URL.revokeObjectURL(url)
-  }
-
   return (
-    <div className="space-y-4 p-4">
-      <div className="flex items-center gap-2">
-        <ArrowLeftRight className="h-5 w-5 text-primary" />
-        <h2 className="text-lg font-semibold font-mono">json_yaml_converter</h2>
-      </div>
-
-      <Card>
-        <CardContent className="p-3 flex flex-wrap items-center gap-3">
-          <Tabs value={mode} onValueChange={(v) => setMode(v as typeof mode)} className="w-auto">
-            <TabsList className="h-8">
-              <TabsTrigger value="json-to-yaml" className="text-xs h-6 px-3">JSON → YAML</TabsTrigger>
-              <TabsTrigger value="yaml-to-json" className="text-xs h-6 px-3">YAML → JSON</TabsTrigger>
-            </TabsList>
-          </Tabs>
-          <Button size="sm" onClick={convert} className="bg-primary hover:bg-primary/90">
-            <Zap className="h-3 w-3 mr-1" />
-            Convert
-          </Button>
-          {output && (
-            <>
-              <Button size="sm" variant="outline" onClick={copyOutput}>
-                <Copy className="h-3 w-3 mr-1" />
-                Copy
-              </Button>
-              <Button size="sm" variant="outline" onClick={downloadOutput}>
-                <Download className="h-3 w-3 mr-1" />
-                Download
-              </Button>
-            </>
-          )}
-          {error && (
-            <span className="text-xs text-destructive">{error}</span>
-          )}
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <CodeEditor
-          value={mode === 'json-to-yaml' ? jsonInput : yamlInput}
-          onChange={mode === 'json-to-yaml' ? setJsonInput : setYamlInput}
-          placeholder={mode === 'json-to-yaml' ? "Paste JSON here..." : "Paste YAML here..."}
-          language={mode === 'json-to-yaml' ? "json" : "yaml"}
-          title="Input"
+    <ToolShell
+      icon={ArrowLeftRight}
+      title="JSON / YAML Converter"
+    >
+      <TooltipProvider delayDuration={200}>
+        <TwoPanelLayout
+          toolbar={
+            <div className="flex items-center gap-3">
+              <Tabs value={mode} onValueChange={(v) => setMode(v as typeof mode)} className="w-auto">
+                <TabsList className="h-8">
+                  <TabsTrigger value="json-to-yaml" className="text-xs h-6 px-3">JSON → YAML</TabsTrigger>
+                  <TabsTrigger value="yaml-to-json" className="text-xs h-6 px-3">YAML → JSON</TabsTrigger>
+                </TabsList>
+              </Tabs>
+              {error && <span className="text-xs text-destructive">{error}</span>}
+            </div>
+          }
+          input={
+            <CodeEditor
+              value={mode === 'json-to-yaml' ? jsonInput : yamlInput}
+              onChange={mode === 'json-to-yaml' ? setJsonInput : setYamlInput}
+              placeholder={mode === 'json-to-yaml' ? "Paste JSON here..." : "Paste YAML here..."}
+              language={mode === 'json-to-yaml' ? "json" : "yaml"}
+              title="Input"
+            />
+          }
+          actions={<>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="icon" onClick={convert} className="h-8 w-8 rounded-full bg-gradient-primary text-primary-foreground shadow-sm">
+                  <Zap className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right"><p>Convert</p></TooltipContent>
+            </Tooltip>
+            <div className="w-4 h-px md:w-px md:h-4 bg-border/60" />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="icon" variant="ghost" onClick={() => { setJsonInput(""); setYamlInput(""); setOutput(""); setError(null) }} className="h-7 w-7 rounded-full text-muted-foreground">
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right"><p>Clear all</p></TooltipContent>
+            </Tooltip>
+          </>}
+          output={
+            <CodeEditor
+              value={output}
+              onChange={() => {}}
+              placeholder="Converted output..."
+              language={mode === 'json-to-yaml' ? "yaml" : "json"}
+              title="Output"
+              readOnly
+            />
+          }
         />
-        <CodeEditor
-          value={output}
-          onChange={() => {}}
-          placeholder="Converted output..."
-          language={mode === 'json-to-yaml' ? "yaml" : "json"}
-          title="Output"
-          readOnly
-        />
-      </div>
-    </div>
+      </TooltipProvider>
+    </ToolShell>
   )
 }

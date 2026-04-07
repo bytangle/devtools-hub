@@ -55,7 +55,7 @@ export function WorkspaceHeader() {
   ]
 
   return (
-    <header className="h-11 border-b bg-card/80 backdrop-blur-sm flex items-center px-3 gap-2 flex-shrink-0">
+    <header className="h-11 border-b bg-card/80 backdrop-blur-sm flex items-center px-2 sm:px-3 gap-1.5 sm:gap-2 flex-shrink-0">
       {/* Sidebar Toggle */}
       <Button
         variant="ghost"
@@ -97,7 +97,7 @@ export function WorkspaceHeader() {
       </div>
 
       {/* Search - Command Palette Style */}
-      <div className="flex-1 max-w-sm mx-4">
+      <div className="flex-1 max-w-xs sm:max-w-sm mx-2 sm:mx-4">
         <Button
           variant="outline"
           className="w-full justify-start text-sm text-muted-foreground h-8 font-mono bg-muted/30 border-border/50 hover:border-primary/30 hover:bg-muted/50"

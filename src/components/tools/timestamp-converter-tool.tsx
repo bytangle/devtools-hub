@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { ToolShell } from "@/components/tools/shared/tool-shell"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Clock, Copy, RefreshCw } from "lucide-react"
@@ -64,27 +64,20 @@ export function TimestampConverterTool({ tabId, onOutputChange }: ToolComponentP
   const date = !isNaN(ts) ? (ts > 9999999999 ? new Date(ts) : new Date(ts * 1000)) : null
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Clock className="h-5 w-5 text-primary" />
-        <h2 className="text-lg font-semibold">Timestamp Converter</h2>
-      </div>
-
-      <Card>
-        <CardContent className="p-3">
-          <Button size="sm" onClick={setCurrentTime} className="bg-gradient-primary">
+    <ToolShell
+      icon={Clock}
+      title="Timestamp Converter"
+      actions={<><Button size="sm" onClick={setCurrentTime} className="bg-gradient-primary">
             <RefreshCw className="h-3 w-3 mr-1" />
             Current Time
-          </Button>
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Unix Timestamp</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
+          </Button></>}
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <div className="rounded-lg border">
+          <div className="p-4 pb-3">
+            <Label className="text-sm font-medium">Unix Timestamp</Label>
+          </div>
+          <div className="p-4 pt-0 space-y-3">
             <div className="flex gap-2">
               <Input 
                 value={timestamp} 
@@ -99,14 +92,14 @@ export function TimestampConverterTool({ tabId, onOutputChange }: ToolComponentP
             <Button size="sm" onClick={convertTimestamp} variant="outline" className="w-full">
               Convert to Date →
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Date String (ISO 8601)</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
+        <div className="rounded-lg border">
+          <div className="p-4 pb-3">
+            <Label className="text-sm font-medium">Date String (ISO 8601)</Label>
+          </div>
+          <div className="p-4 pt-0 space-y-3">
             <div className="flex gap-2">
               <Input 
                 type="datetime-local" 
@@ -120,13 +113,12 @@ export function TimestampConverterTool({ tabId, onOutputChange }: ToolComponentP
             <Button size="sm" onClick={convertDate} variant="outline" className="w-full">
               ← Convert to Timestamp
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       {date && (
-        <Card>
-          <CardContent className="p-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+        <div className="rounded-lg border p-4 grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
             <div>
               <div className="text-xs text-muted-foreground">Local</div>
               <div className="text-sm font-mono">{date.toLocaleString()}</div>
@@ -143,9 +135,8 @@ export function TimestampConverterTool({ tabId, onOutputChange }: ToolComponentP
               <div className="text-xs text-muted-foreground">Unix (ms)</div>
               <div className="text-sm font-mono">{date.getTime()}</div>
             </div>
-          </CardContent>
-        </Card>
+        </div>
       )}
-    </div>
+    </ToolShell>
   )
 }

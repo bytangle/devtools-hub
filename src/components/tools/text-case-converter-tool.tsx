@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react"
-import { Card, CardContent } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
+import { ToolShell } from "@/components/tools/shared/tool-shell"
 import { Type, Copy, ArrowRight } from "lucide-react"
 import { ToolComponentProps } from "@/components/workspace/tool-panel"
 import { useWorkspace } from "@/context/workspace-context"
@@ -78,7 +78,7 @@ export function TextCaseConverterTool({ tabId, initialInput, onOutputChange }: T
   const savedState = getToolState(tabId)
   const { toast } = useToast()
   
-  const [input, setInput] = useState(savedState?.input as string || initialInput || "hello world example")
+  const [input, setInput] = useState(initialInput || savedState?.input as string || "hello world example")
   const [selectedCase, setSelectedCase] = useState<CaseType>(savedState?.selectedCase as CaseType || 'camel')
 
   useEffect(() => {
@@ -106,14 +106,12 @@ export function TextCaseConverterTool({ tabId, initialInput, onOutputChange }: T
   }
 
   return (
-    <div className="space-y-4 p-4">
-      <div className="flex items-center gap-2">
-        <Type className="h-5 w-5 text-primary" />
-        <h2 className="text-lg font-semibold font-mono">text_case_converter</h2>
-      </div>
-
-      <Card>
-        <CardContent className="p-4">
+    <ToolShell
+      icon={Type}
+      title="Text Case Converter"
+    >
+      <div className="space-y-4">
+        <div>
           <label className="text-sm font-medium mb-2 block">Input Text</label>
           <Textarea
             value={input}
@@ -121,11 +119,9 @@ export function TextCaseConverterTool({ tabId, initialInput, onOutputChange }: T
             placeholder="Enter text to convert..."
             className="font-mono text-sm min-h-[100px]"
           />
-        </CardContent>
-      </Card>
+        </div>
 
-      <Card>
-        <CardContent className="p-4">
+        <div className="rounded-lg border p-4">
           <label className="text-sm font-medium mb-3 block">Select Output Case</label>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
             {caseTypes.map(ct => (
@@ -140,11 +136,9 @@ export function TextCaseConverterTool({ tabId, initialInput, onOutputChange }: T
               </Button>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      <Card>
-        <CardContent className="p-4">
+        <div className="rounded-lg border p-4">
           <div className="flex items-center justify-between mb-2">
             <label className="text-sm font-medium">Selected Output</label>
             <Badge variant="secondary" className="font-mono text-xs">{selectedCase}</Badge>
@@ -157,15 +151,13 @@ export function TextCaseConverterTool({ tabId, initialInput, onOutputChange }: T
               <Copy className="h-3 w-3" />
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      <Card>
-        <CardContent className="p-4">
+        <div className="rounded-lg border p-4">
           <label className="text-sm font-medium mb-3 block">All Conversions</label>
           <div className="space-y-2 max-h-[300px] overflow-y-auto">
             {conversions.map(conv => (
-              <div 
+              <div
                 key={conv.id}
                 className="flex items-center justify-between p-2 rounded border bg-muted/30 hover:bg-muted/50 transition-colors"
               >
@@ -180,8 +172,8 @@ export function TextCaseConverterTool({ tabId, initialInput, onOutputChange }: T
               </div>
             ))}
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </div>
+    </ToolShell>
   )
 }

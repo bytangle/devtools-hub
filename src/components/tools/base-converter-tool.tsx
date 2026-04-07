@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react"
-import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { ToolShell } from "@/components/tools/shared/tool-shell"
 import { Binary, Copy, ArrowUpDown } from "lucide-react"
 import { ToolComponentProps } from "@/components/workspace/tool-panel"
 import { useWorkspace } from "@/context/workspace-context"
@@ -68,7 +68,7 @@ export function BaseConverterTool({ tabId, initialInput, onOutputChange }: ToolC
   const { toast } = useToast()
   
   const [fromBase, setFromBase] = useState<Base>(savedState?.fromBase as Base || 10)
-  const [input, setInput] = useState(savedState?.input as string || initialInput || "255")
+  const [input, setInput] = useState(initialInput || savedState?.input as string || "255")
   
   const [binary, setBinary] = useState('')
   const [octal, setOctal] = useState('')
@@ -115,48 +115,42 @@ export function BaseConverterTool({ tabId, initialInput, onOutputChange }: ToolC
   ]
 
   return (
-    <div className="space-y-4 p-4">
-      <div className="flex items-center gap-2">
-        <Binary className="h-5 w-5 text-primary" />
-        <h2 className="text-lg font-semibold font-mono">base_converter</h2>
-      </div>
-
-      <Card>
-        <CardContent className="p-4 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-            <div className="md:col-span-2">
-              <Label className="text-sm font-medium mb-2 block">Input Value</Label>
-              <Input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Enter a number..."
-                className={`font-mono ${!isValid ? 'border-destructive' : ''}`}
-              />
-              {!isValid && (
-                <p className="text-xs text-destructive mt-1">Invalid character for {bases.find(b => b.value === fromBase)?.label}</p>
-              )}
-            </div>
-            <div>
-              <Label className="text-sm font-medium mb-2 block">Input Base</Label>
-              <Select value={fromBase.toString()} onValueChange={(v) => setFromBase(parseInt(v) as Base)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {bases.map(b => (
-                    <SelectItem key={b.value} value={b.value.toString()}>
-                      {b.label} (base {b.value})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+    <ToolShell
+      icon={Binary}
+      title="Base Converter"
+    >
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+          <div className="md:col-span-2">
+            <Label className="text-sm font-medium mb-2 block">Input Value</Label>
+            <Input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Enter a number..."
+              className={`font-mono ${!isValid ? 'border-destructive' : ''}`}
+            />
+            {!isValid && (
+              <p className="text-xs text-destructive mt-1">Invalid character for {bases.find(b => b.value === fromBase)?.label}</p>
+            )}
           </div>
-        </CardContent>
-      </Card>
+          <div>
+            <Label className="text-sm font-medium mb-2 block">Input Base</Label>
+            <Select value={fromBase.toString()} onValueChange={(v) => setFromBase(parseInt(v) as Base)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {bases.map(b => (
+                  <SelectItem key={b.value} value={b.value.toString()}>
+                    {b.label} (base {b.value})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
 
-      <Card>
-        <CardContent className="p-4">
+        <div>
           <Label className="text-sm font-medium mb-3 block">Conversions</Label>
           <div className="space-y-3">
             {results.map(r => (
@@ -182,11 +176,9 @@ export function BaseConverterTool({ tabId, initialInput, onOutputChange }: ToolC
               </div>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      <Card>
-        <CardContent className="p-4">
+        <div>
           <Label className="text-sm font-medium mb-3 block">Quick Reference</Label>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
             <div className="p-2 rounded bg-muted/30">
@@ -206,8 +198,8 @@ export function BaseConverterTool({ tabId, initialInput, onOutputChange }: ToolC
               <div className="font-mono text-sm">0-9, A-F</div>
             </div>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </div>
+    </ToolShell>
   )
 }

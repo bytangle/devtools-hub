@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react"
-import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { ToolShell } from "@/components/tools/shared/tool-shell"
 import { Shield, Copy, RotateCcw } from "lucide-react"
 import { ToolComponentProps } from "@/components/workspace/tool-panel"
 import { useWorkspace } from "@/context/workspace-context"
@@ -137,16 +137,17 @@ export function UnixPermissionsTool({ tabId, initialInput, onOutputChange }: Too
   }
 
   return (
-    <div className="space-y-4 p-4">
-      <div className="flex items-center gap-2">
-        <Shield className="h-5 w-5 text-primary" />
-        <h2 className="text-lg font-semibold font-mono">unix_permissions</h2>
-      </div>
-
+    <ToolShell
+      icon={Shield}
+      title="Unix Permissions"
+      actions={<Button size="sm" variant="ghost" onClick={reset}>
+              <RotateCcw className="h-3 w-3 mr-1" />
+              Reset
+            </Button>}
+    >
       {/* Result */}
-      <Card className="border-primary/30 bg-primary/5">
-        <CardContent className="p-4">
-          <div className="grid grid-cols-2 gap-4">
+      <div className="rounded-lg border p-4">
+        <div className="grid grid-cols-2 gap-4">
             <div>
               <Label className="text-xs text-muted-foreground">Numeric (Octal)</Label>
               <div className="flex items-center gap-2 mt-1">
@@ -171,17 +172,11 @@ export function UnixPermissionsTool({ tabId, initialInput, onOutputChange }: Too
               <Copy className="h-3 w-3 mr-1" />
               chmod {octal}
             </Button>
-            <Button size="sm" variant="ghost" onClick={reset}>
-              <RotateCcw className="h-3 w-3 mr-1" />
-              Reset
-            </Button>
           </div>
-        </CardContent>
-      </Card>
+      </div>
 
       {/* Manual Octal Input */}
-      <Card>
-        <CardContent className="p-4">
+      <div className="rounded-lg border p-4">
           <Label className="text-sm font-medium mb-2 block">Enter Octal</Label>
           <div className="flex gap-2">
             <Input
@@ -193,12 +188,10 @@ export function UnixPermissionsTool({ tabId, initialInput, onOutputChange }: Too
             />
             <Button onClick={applyOctal}>Apply</Button>
           </div>
-        </CardContent>
-      </Card>
+      </div>
 
       {/* Permission Matrix */}
-      <Card>
-        <CardContent className="p-4">
+      <div className="rounded-lg border p-4">
           <Label className="text-sm font-medium mb-3 block">Permission Matrix</Label>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -237,12 +230,10 @@ export function UnixPermissionsTool({ tabId, initialInput, onOutputChange }: Too
               </tbody>
             </table>
           </div>
-        </CardContent>
-      </Card>
+      </div>
 
       {/* Common Presets */}
-      <Card>
-        <CardContent className="p-4">
+      <div className="rounded-lg border p-4">
           <Label className="text-sm font-medium mb-3 block">Common Permissions</Label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {commonPresets.map(preset => (
@@ -260,8 +251,7 @@ export function UnixPermissionsTool({ tabId, initialInput, onOutputChange }: Too
               </Button>
             ))}
           </div>
-        </CardContent>
-      </Card>
-    </div>
+      </div>
+    </ToolShell>
   )
 }

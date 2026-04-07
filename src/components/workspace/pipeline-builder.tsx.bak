@@ -1,0 +1,968 @@
+import { useState, useCallback } from "react"
+import { useWorkspace, type PipelineNode } from "@/context/workspace-context"
+import { tools, type Tool } from "@/data/tools"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Badge } from "@/components/ui/badge"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import {
+  Plus,
+  Play,
+  Trash2,
+  GripVertical,
+  ChevronRight,
+  RotateCcw,
+  Copy,
+  ArrowRight,
+  Zap,
+  Check,
+  Loader2,
+  Terminal,
+  X,
+  Eye,
+  EyeOff,
+  Workflow,
+  CircleDot,
+} from "lucide-react"
+import { cn } from "@/lib/utils"
+import { useToast } from "@/hooks/use-toast"
+
+// Tool categories for grouping in selector
+const toolCategories = {
+  formatters: ["json-formatter", "html-formatter", "css-formatter", "sql-formatter", "minify-css", "minify-js", "yaml-formatter", "xml-formatter", "graphql-formatter"],
+  converters: ["base64-encode", "base64-decode", "url-encode", "url-decode", "timestamp-converter", "text-case-converter", "base-converter", "json-yaml-converter", "csv-json-converter", "escape-unescape", "byte-unit-converter"],
+  generators: ["password-generator", "uuid-generator", "hash-generator", "lorem-generator", "qr-generator", "mock-data-generator", "jwt-generator"],
+  validators: ["json-validator", "html-validator", "css-validator"],
+  utilities: ["regex-tester", "text-counter", "diff-checker", "markdown-preview", "jwt-decoder", "color-picker", "cron-builder", "unix-permissions", "http-status"],
+}
+
+const getToolById = (id: string): Tool | undefined => tools.find((t) => t.id === id)
+
+/* ─── Inline Tool Picker (popover between nodes or at end) ─── */
+
+function ToolPicker({ onSelect, children }: { onSelect: (toolId: string) => void; children: React.ReactNode }) {
+  const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState("")
+  const [category, setCategory] = useState("all")
+
+  const filtered = tools.filter((t) => {
+    const matchesSearch = t.title.toLowerCase().includes(search.toLowerCase())
+    if (category === "all") return matchesSearch
+    const ids = toolCategories[category as keyof typeof toolCategories] || []
+    return matchesSearch && ids.includes(t.id)
+  })
+
+  return (
+    <Popover open={open} onOpenChange={(v) => { setOpen(v); if (!v) setSearch("") }}>
+      <PopoverTrigger asChild>{children}</PopoverTrigger>
+      <PopoverContent className="w-80 p-0" align="center" side="right" sideOffset={8}>
+        <div className="p-3 border-b space-y-2">
+          <Input
+            placeholder="Search tools..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="h-8 text-sm"
+            autoFocus
+          />
+          <div className="flex gap-1 flex-wrap">
+            {["all", "formatters", "converters", "generators", "validators", "utilities"].map((c) => (
+              <button
+                key={c}
+                onClick={() => setCategory(c)}
+                className={cn(
+                  "px-2 py-0.5 text-xs rounded-full transition-colors",
+                  category === c
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {c === "all" ? "All" : c.charAt(0).toUpperCase() + c.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
+        <ScrollArea className="h-64">
+          <div className="p-1">
+            {filtered.map((tool) => {
+              const Icon = tool.icon
+              return (
+                <button
+                  key={tool.id}
+                  onClick={() => { onSelect(tool.id); setOpen(false); setSearch("") }}
+                  className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md hover:bg-accent text-left transition-colors group"
+                >
+                  <Icon className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-primary transition-colors" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium truncate">{tool.title}</div>
+                  </div>
+                  <Plus className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                </button>
+              )
+            })}
+            {filtered.length === 0 && (
+              <div className="text-center py-6 text-sm text-muted-foreground">No tools found</div>
+            )}
+          </div>
+        </ScrollArea>
+      </PopoverContent>
+    </Popover>
+  )
+}
+
+/* ─── Compact Flow Node ─── */
+
+interface FlowNodeProps {
+  node: PipelineNode
+  index: number
+  totalSteps: number
+  status: "idle" | "running" | "done" | "error"
+  inspected: boolean
+  onInspect: () => void
+  onRemove: () => void
+  onRun: () => void
+  onDragStart: (e: React.DragEvent, index: number) => void
+  onDragOver: (e: React.DragEvent, index: number) => void
+  onDragEnd: () => void
+  isDragTarget: boolean
+}
+
+function FlowNode({
+  node, index, totalSteps, status, inspected, onInspect,
+  onRemove, onRun, onDragStart, onDragOver, onDragEnd, isDragTarget,
+}: FlowNodeProps) {
+  const tool = getToolById(node.toolId)
+  if (!tool) return null
+
+  const Icon = tool.icon
+
+  return (
+    <div
+      className="relative group"
+      draggable
+      onDragStart={(e) => onDragStart(e, index)}
+      onDragOver={(e) => onDragOver(e, index)}
+      onDragEnd={onDragEnd}
+    >
+      {/* Drop target indicator */}
+      {isDragTarget && (
+        <div className="absolute -top-1 left-0 right-0 h-0.5 bg-primary rounded-full z-10" />
+      )}
+
+      <div
+        className={cn(
+          "flex items-center gap-3 px-3 py-2.5 rounded-lg border transition-all cursor-pointer",
+          "hover:border-primary/40 hover:bg-accent/50",
+          status === "done" && "border-emerald-500/40 bg-emerald-500/5",
+          status === "running" && "border-primary/60 bg-primary/5",
+          status === "error" && "border-red-500/40 bg-red-500/5",
+          status === "idle" && "border-border bg-card",
+          isDragTarget && "border-primary border-dashed",
+          inspected && "ring-1 ring-primary/30"
+        )}
+        onClick={onInspect}
+      >
+        {/* Drag handle */}
+        <GripVertical className="h-3.5 w-3.5 text-muted-foreground/50 cursor-grab active:cursor-grabbing shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+
+        {/* Status dot */}
+        <div className={cn(
+          "h-2 w-2 rounded-full shrink-0 transition-colors",
+          status === "done" && "bg-emerald-500",
+          status === "running" && "bg-primary animate-pulse",
+          status === "error" && "bg-red-500",
+          status === "idle" && "bg-muted-foreground/30",
+        )} />
+
+        {/* Tool info */}
+        <Icon className={cn(
+          "h-4 w-4 shrink-0",
+          status === "done" && "text-emerald-500",
+          status === "running" && "text-primary",
+          status === "idle" && "text-muted-foreground",
+        )} />
+        <div className="flex-1 min-w-0">
+          <div className="text-sm font-medium truncate">{tool.title}</div>
+        </div>
+
+        {/* Step badge */}
+        <span className="text-[10px] text-muted-foreground font-mono tabular-nums">
+          {index + 1}/{totalSteps}
+        </span>
+
+        {/* Actions — visible on hover */}
+        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            onClick={(e) => { e.stopPropagation(); onRun() }}
+            className={cn(
+              "p-1 rounded hover:bg-primary/10 transition-colors",
+              status === "running" ? "text-primary" : "text-muted-foreground hover:text-primary"
+            )}
+            title="Run to this step"
+          >
+            {status === "running" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); onRemove() }}
+            className="p-1 rounded text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors"
+            title="Remove step"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ─── Connector between nodes ─── */
+
+function FlowConnector({ hasData }: { hasData: boolean }) {
+  return (
+    <div className="flex items-center justify-center h-6 relative">
+      <div className={cn(
+        "w-px h-full transition-colors",
+        hasData ? "bg-emerald-500/40" : "bg-border"
+      )} />
+      {hasData && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <ChevronRight className="h-3 w-3 text-emerald-500/60 rotate-90" />
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ─── Insert button between nodes ─── */
+
+function InsertButton({ onSelect }: { onSelect: (toolId: string) => void }) {
+  return (
+    <div className="flex items-center justify-center h-6 relative group/insert">
+      <div className="w-px h-full bg-border" />
+      <ToolPicker onSelect={onSelect}>
+        <button className="absolute z-10 p-0.5 rounded-full bg-background border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-primary hover:text-primary hover:bg-primary/5 transition-all opacity-0 group-hover/insert:opacity-100">
+          <Plus className="h-3 w-3" />
+        </button>
+      </ToolPicker>
+    </div>
+  )
+}
+
+/* ─── Inspect Panel (I/O detail for a selected node) ─── */
+
+function InspectPanel({ node, index, onCopy }: { node: PipelineNode; index: number; onCopy: (text: string, label: string) => void }) {
+  const tool = getToolById(node.toolId)
+  if (!tool) return null
+
+  const Icon = tool.icon
+  const hasOutput = !!node.output
+  const hasError = node.output?.startsWith("Error:")
+
+  return (
+    <div className="border-t bg-card/50">
+      <div className="p-3 border-b flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Icon className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm font-medium">Step {index + 1}: {tool.title}</span>
+          {hasOutput && !hasError && <Check className="h-3.5 w-3.5 text-emerald-500" />}
+        </div>
+        <span className="text-xs text-muted-foreground font-mono">{tool.category}</span>
+      </div>
+      <div className="grid grid-cols-2 divide-x max-h-[200px]">
+        {/* Input side */}
+        <div className="p-3 space-y-1.5">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Input</span>
+            {node.input && (
+              <button onClick={() => onCopy(node.input!, "Input")} className="text-muted-foreground hover:text-foreground transition-colors">
+                <Copy className="h-3 w-3" />
+              </button>
+            )}
+          </div>
+          <pre className="text-xs font-mono text-muted-foreground whitespace-pre-wrap break-all max-h-[150px] overflow-auto">
+            {node.input || <span className="italic">Empty</span>}
+          </pre>
+        </div>
+        {/* Output side */}
+        <div className="p-3 space-y-1.5">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Output</span>
+            {hasOutput && (
+              <button onClick={() => onCopy(node.output!, "Output")} className="text-muted-foreground hover:text-foreground transition-colors">
+                <Copy className="h-3 w-3" />
+              </button>
+            )}
+          </div>
+          <pre className={cn(
+            "text-xs font-mono whitespace-pre-wrap break-all max-h-[150px] overflow-auto",
+            hasError ? "text-red-400" : hasOutput ? "text-emerald-400" : "text-muted-foreground"
+          )}>
+            {node.output || <span className="italic">Not run yet</span>}
+          </pre>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Tool processor - runs actual tool logic for pipeline steps
+function processToolStep(toolId: string, input: string): string {
+  switch (toolId) {
+    case "json-formatter":
+      try {
+        return JSON.stringify(JSON.parse(input), null, 2)
+      } catch {
+        return `Error: Invalid JSON\n\nInput:\n${input}`
+      }
+
+    case "base64-encode":
+      try {
+        return btoa(unescape(encodeURIComponent(input)))
+      } catch {
+        return `Error: Cannot encode to Base64\n\nInput:\n${input}`
+      }
+
+    case "base64-decode":
+      try {
+        return decodeURIComponent(escape(atob(input.trim())))
+      } catch {
+        return `Error: Invalid Base64 string\n\nInput:\n${input}`
+      }
+
+    case "url-encode":
+      return encodeURIComponent(input)
+
+    case "url-decode":
+      try {
+        return decodeURIComponent(input)
+      } catch {
+        return `Error: Invalid URL encoding\n\nInput:\n${input}`
+      }
+
+    case "json-validator":
+      try {
+        JSON.parse(input)
+        return `✓ Valid JSON\n\n${input}`
+      } catch (e) {
+        return `✗ Invalid JSON: ${e instanceof Error ? e.message : 'Unknown error'}\n\nInput:\n${input}`
+      }
+
+    case "text-counter": {
+      const chars = input.length
+      const words = input.trim() ? input.trim().split(/\s+/).length : 0
+      const lines = input.split("\n").length
+      const bytes = new Blob([input]).size
+      return `Characters: ${chars}\nWords: ${words}\nLines: ${lines}\nBytes: ${bytes}\n\n---\n${input}`
+    }
+
+    case "minify-css":
+    case "css-minifier":
+      return input
+        .replace(/\/\*[\s\S]*?\*\//g, "")
+        .replace(/\s+/g, " ")
+        .replace(/\s*([{}:;,])\s*/g, "$1")
+        .trim()
+
+    case "minify-js":
+    case "js-minifier":
+      return input
+        .replace(/\/\*[\s\S]*?\*\//g, "")
+        .replace(/\/\/.*$/gm, "")
+        .replace(/\s+/g, " ")
+        .replace(/\s*([{}():;,=+\-*/<>!&|])\s*/g, "$1")
+        .trim()
+
+    case "hash-generator": {
+      // Simple hash calculation for sync operation
+      let hash = 0
+      for (let i = 0; i < input.length; i++) {
+        const char = input.charCodeAt(i)
+        hash = ((hash << 5) - hash) + char
+        hash = hash & hash
+      }
+      const hashHex = Math.abs(hash).toString(16).padStart(8, "0")
+      
+      return `Hash: ${hashHex}\nLength: ${input.length} chars\n\n---\n${input}`
+    }
+
+    case "html-formatter":
+      try {
+        // Simple HTML formatting
+        let formatted = input
+        let indent = 0
+        const lines: string[] = []
+        
+        formatted.split(/(<[^>]+>)/g).forEach(part => {
+          if (!part.trim()) return
+          
+          if (part.match(/^<\//)) {
+            indent = Math.max(0, indent - 1)
+          }
+          
+          if (part.startsWith('<')) {
+            lines.push('  '.repeat(indent) + part.trim())
+          } else if (part.trim()) {
+            lines.push('  '.repeat(indent) + part.trim())
+          }
+          
+          if (part.match(/^<[^\/!][^>]*[^\/]>$/) && !part.match(/^<(br|hr|img|input|meta|link)/i)) {
+            indent++
+          }
+        })
+        
+        return lines.join('\n')
+      } catch {
+        return input
+      }
+
+    case "css-formatter":
+      try {
+        return input
+          .replace(/\{/g, ' {\n  ')
+          .replace(/;/g, ';\n  ')
+          .replace(/\}/g, '\n}\n')
+          .replace(/  \n\}/g, '}')
+          .trim()
+      } catch {
+        return input
+      }
+
+    case "sql-formatter":
+      try {
+        const keywords = ['SELECT', 'FROM', 'WHERE', 'AND', 'OR', 'JOIN', 'LEFT', 'RIGHT', 'INNER', 'OUTER', 'ON', 'ORDER BY', 'GROUP BY', 'HAVING', 'INSERT', 'UPDATE', 'DELETE', 'CREATE', 'DROP', 'ALTER', 'TABLE', 'INTO', 'VALUES', 'SET', 'LIMIT', 'OFFSET', 'UNION', 'AS']
+        let formatted = input.toUpperCase()
+        keywords.forEach(kw => {
+          formatted = formatted.replace(new RegExp(`\\b${kw}\\b`, 'gi'), `\n${kw}`)
+        })
+        return formatted.trim().replace(/^\n/, '')
+      } catch {
+        return input
+      }
+
+    case "uuid-generator":
+      // Generate a new UUID and append to input
+      const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+        const r = Math.random() * 16 | 0
+        const v = c === 'x' ? r : (r & 0x3 | 0x8)
+        return v.toString(16)
+      })
+      return input ? `${input}\n${uuid}` : uuid
+
+    case "password-generator": {
+      const length = 16
+      const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*'
+      let password = ''
+      for (let i = 0; i < length; i++) {
+        password += charset.charAt(Math.floor(Math.random() * charset.length))
+      }
+      return input ? `${input}\n${password}` : password
+    }
+
+    case "lorem-generator": {
+      const lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris."
+      return input ? `${input}\n\n${lorem}` : lorem
+    }
+
+    case "timestamp-converter": {
+      const now = Date.now()
+      const date = new Date(now)
+      return `Unix: ${Math.floor(now / 1000)}\nISO: ${date.toISOString()}\nLocal: ${date.toLocaleString()}\n\n${input ? `Input: ${input}` : ''}`
+    }
+
+    case "regex-tester":
+      // Just pass through - regex testing needs the pattern which we don't have
+      return `Regex test input:\n${input}`
+
+    case "color-picker":
+      // Pass through - color picker is interactive
+      return input
+
+    case "jwt-decoder":
+      try {
+        const parts = input.trim().split('.')
+        if (parts.length !== 3) {
+          return `Error: Invalid JWT format (expected 3 parts, got ${parts.length})\n\nInput:\n${input}`
+        }
+        const header = JSON.parse(atob(parts[0]))
+        const payload = JSON.parse(atob(parts[1]))
+        return `Header:\n${JSON.stringify(header, null, 2)}\n\nPayload:\n${JSON.stringify(payload, null, 2)}`
+      } catch {
+        return `Error: Could not decode JWT\n\nInput:\n${input}`
+      }
+
+    case "markdown-preview":
+      // Simple markdown to text conversion
+      return input
+        .replace(/^### (.*$)/gim, '$1')
+        .replace(/^## (.*$)/gim, '$1')
+        .replace(/^# (.*$)/gim, '$1')
+        .replace(/\*\*(.*)\*\*/gim, '$1')
+        .replace(/\*(.*)\*/gim, '$1')
+        .replace(/`(.*)`/gim, '$1')
+
+    // New tool processors
+    case "text-case-converter": {
+      // Convert to various cases - default to camelCase
+      const words = input.replace(/([a-z])([A-Z])/g, '$1 $2')
+        .replace(/[_\-./\\]+/g, ' ')
+        .trim()
+        .split(/\s+/)
+        .filter(w => w.length > 0)
+      return words.map((w, i) => i === 0 ? w.toLowerCase() : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join('')
+    }
+
+    case "base-converter": {
+      // Try to parse as decimal and show all bases
+      const num = parseInt(input.trim())
+      if (isNaN(num)) return `Error: Invalid number\n\nInput:\n${input}`
+      return `Binary:  ${num.toString(2)}\nOctal:   ${num.toString(8)}\nDecimal: ${num}\nHex:     ${num.toString(16).toUpperCase()}`
+    }
+
+    case "yaml-formatter":
+    case "xml-formatter":
+    case "graphql-formatter":
+      // These require complex parsing - pass through
+      return input
+
+    case "json-yaml-converter": {
+      // Try to detect and convert
+      const trimmed = input.trim()
+      if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+        // JSON to simple YAML-ish format
+        try {
+          const data = JSON.parse(trimmed)
+          return JSON.stringify(data, null, 2)
+            .replace(/"/g, '')
+            .replace(/,$/gm, '')
+            .replace(/[{}[\]]/g, '')
+        } catch {
+          return input
+        }
+      }
+      return input
+    }
+
+    case "csv-json-converter": {
+      // Simple CSV to JSON
+      const lines = input.trim().split('\n')
+      if (lines.length < 2) return input
+      const headers = lines[0].split(',').map(h => h.trim())
+      const rows = lines.slice(1).map(line => {
+        const values = line.split(',')
+        const obj: Record<string, string> = {}
+        headers.forEach((h, i) => { obj[h] = values[i]?.trim() || '' })
+        return obj
+      })
+      return JSON.stringify(rows, null, 2)
+    }
+
+    case "escape-unescape": {
+      // HTML escape by default
+      return input
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+    }
+
+    case "byte-unit-converter": {
+      const num = parseFloat(input.trim())
+      if (isNaN(num)) return `Error: Invalid number\n\nInput:\n${input}`
+      return `Bytes: ${num}\nKB: ${(num / 1000).toFixed(2)}\nMB: ${(num / 1000000).toFixed(4)}\nGB: ${(num / 1000000000).toFixed(6)}`
+    }
+
+    case "mock-data-generator": {
+      // Generate a simple mock person
+      const names = ['John', 'Jane', 'Bob', 'Alice']
+      const domains = ['example.com', 'test.com']
+      const name = names[Math.floor(Math.random() * names.length)]
+      const email = `${name.toLowerCase()}@${domains[Math.floor(Math.random() * domains.length)]}`
+      return JSON.stringify({ id: crypto.randomUUID(), name, email }, null, 2)
+    }
+
+    case "jwt-generator": {
+      // Generate a simple test JWT
+      const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).replace(/=/g, '')
+      const payload = btoa(JSON.stringify({ sub: '123', name: input || 'Test', iat: Math.floor(Date.now() / 1000) })).replace(/=/g, '')
+      return `${header}.${payload}.signature`
+    }
+
+    case "cron-builder":
+    case "unix-permissions":
+    case "http-status":
+      // Interactive tools - pass through
+      return input
+
+    default:
+      // Pass through for tools without pipeline processing
+      return input
+  }
+}
+
+export function PipelineBuilder() {
+  const { activePipeline, addPipelineNode, removePipelineNode, updatePipelineNode, movePipelineNode, clearPipeline } =
+    useWorkspace()
+
+  const [isRunning, setIsRunning] = useState(false)
+  const [runningStepIndex, setRunningStepIndex] = useState<number | null>(null)
+  const [dragIndex, setDragIndex] = useState<number | null>(null)
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
+  const [inspectedIndex, setInspectedIndex] = useState<number | null>(null)
+  const [showOutput, setShowOutput] = useState(true)
+  const { toast } = useToast()
+
+  const nodes = activePipeline.nodes
+  const lastOutput = nodes.length > 0 ? nodes[nodes.length - 1]?.output : null
+  const firstInput = nodes.length > 0 ? nodes[0]?.input : ""
+
+  const handleAddTool = useCallback(
+    (toolId: string) => addPipelineNode(toolId),
+    [addPipelineNode]
+  )
+
+  const handleInsertTool = useCallback(
+    (toolId: string, afterIndex: number) => {
+      // Add at end then move into position
+      addPipelineNode(toolId)
+      // We need to move the last node to afterIndex + 1
+      const newIndex = nodes.length // it was just appended
+      if (afterIndex + 1 < newIndex) {
+        setTimeout(() => movePipelineNode(newIndex, afterIndex + 1), 0)
+      }
+    },
+    [addPipelineNode, movePipelineNode, nodes.length]
+  )
+
+  const handleUpdateInput = useCallback(
+    (input: string) => {
+      if (nodes.length > 0) {
+        updatePipelineNode(nodes[0].id, { input })
+      }
+    },
+    [nodes, updatePipelineNode]
+  )
+
+  // Drag and drop
+  const handleDragStart = useCallback((e: React.DragEvent, index: number) => {
+    setDragIndex(index)
+    e.dataTransfer.effectAllowed = "move"
+    e.dataTransfer.setData("text/plain", String(index))
+  }, [])
+
+  const handleDragOver = useCallback((e: React.DragEvent, index: number) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = "move"
+    setDragOverIndex(index)
+  }, [])
+
+  const handleDragEnd = useCallback(() => {
+    if (dragIndex !== null && dragOverIndex !== null && dragIndex !== dragOverIndex) {
+      movePipelineNode(dragIndex, dragOverIndex)
+    }
+    setDragIndex(null)
+    setDragOverIndex(null)
+  }, [dragIndex, dragOverIndex, movePipelineNode])
+
+  // Run pipeline to a specific step
+  const runFromStep = useCallback(async (targetIndex: number) => {
+    if (nodes.length === 0) return
+    setIsRunning(true)
+
+    try {
+      let startIndex = 0
+      for (let i = 0; i <= targetIndex; i++) {
+        if (i === 0) { startIndex = 0; break }
+        if (!nodes[i - 1]?.output) { startIndex = i - 1; break }
+        startIndex = i
+      }
+
+      let currentInput = startIndex === 0
+        ? (nodes[0]?.input || "")
+        : (nodes[startIndex - 1]?.output || "")
+
+      for (let i = startIndex; i <= targetIndex; i++) {
+        const node = nodes[i]
+        setRunningStepIndex(i)
+
+        if (i === 0) {
+          currentInput = node.input || ""
+        } else {
+          updatePipelineNode(node.id, { input: currentInput })
+        }
+
+        await new Promise((r) => setTimeout(r, 250))
+        const output = processToolStep(node.toolId, currentInput)
+        updatePipelineNode(node.id, { output })
+        currentInput = output
+      }
+    } finally {
+      setIsRunning(false)
+      setRunningStepIndex(null)
+    }
+  }, [nodes, updatePipelineNode])
+
+  const runAll = useCallback(async () => {
+    if (nodes.length === 0) return
+    await runFromStep(nodes.length - 1)
+  }, [nodes.length, runFromStep])
+
+  const handleReset = useCallback(() => {
+    nodes.forEach((node, i) => {
+      updatePipelineNode(node.id, { output: undefined })
+      if (i > 0) updatePipelineNode(node.id, { input: undefined })
+    })
+    setInspectedIndex(null)
+  }, [nodes, updatePipelineNode])
+
+  const getNodeStatus = (index: number): "idle" | "running" | "done" | "error" => {
+    if (runningStepIndex === index) return "running"
+    const node = nodes[index]
+    if (!node?.output) return "idle"
+    if (node.output.startsWith("Error:")) return "error"
+    return "done"
+  }
+
+  const copyText = useCallback((text: string, label: string) => {
+    navigator.clipboard.writeText(text)
+    toast({ title: `${label} copied` })
+  }, [toast])
+
+  // Pipeline flow breadcrumb
+  const flowSummary = nodes.map((n) => getToolById(n.toolId)?.title || n.toolId)
+
+  return (
+    <div className="h-full flex flex-col bg-background">
+      {/* ── Top toolbar ── */}
+      <div className="border-b px-4 py-2.5 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <Workflow className="h-4.5 w-4.5 text-primary" />
+          <span className="font-semibold text-sm">Pipeline</span>
+          {nodes.length > 0 && (
+            <span className="text-xs text-muted-foreground font-mono">
+              {nodes.length} step{nodes.length !== 1 ? "s" : ""}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-1.5">
+          {nodes.length > 0 && (
+            <>
+              <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={handleReset} disabled={isRunning}>
+                <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
+                Reset
+              </Button>
+              <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-red-500 hover:text-red-600" onClick={clearPipeline} disabled={isRunning}>
+                <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                Clear
+              </Button>
+              <div className="w-px h-4 bg-border mx-1" />
+              <Button size="sm" className="h-7 px-3 text-xs gap-1.5" onClick={runAll} disabled={nodes.length === 0 || isRunning || !firstInput}>
+                {isRunning ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
+                {isRunning ? "Running…" : "Run All"}
+              </Button>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* ── Flow breadcrumb ── */}
+      {nodes.length > 0 && (
+        <div className="px-4 py-1.5 border-b bg-muted/30 flex items-center gap-1 overflow-x-auto text-xs">
+          <Terminal className="h-3 w-3 text-muted-foreground shrink-0" />
+          {flowSummary.map((name, i) => (
+            <span key={i} className="flex items-center gap-1 shrink-0">
+              <button
+                onClick={() => setInspectedIndex(inspectedIndex === i ? null : i)}
+                className={cn(
+                  "hover:text-primary transition-colors",
+                  inspectedIndex === i ? "text-primary font-medium" : "text-muted-foreground"
+                )}
+              >
+                {name}
+              </button>
+              {i < flowSummary.length - 1 && <ArrowRight className="h-2.5 w-2.5 text-muted-foreground/40" />}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div className="flex-1 flex flex-col min-h-0">
+        {/* ── Empty state ── */}
+        {nodes.length === 0 ? (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center max-w-sm">
+              <div className="mx-auto w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                <Workflow className="h-7 w-7 text-primary" />
+              </div>
+              <h3 className="font-semibold mb-1.5">Build a Pipeline</h3>
+              <p className="text-sm text-muted-foreground mb-5">
+                Chain tools together — the output of each step flows into the next.
+              </p>
+
+              <ToolPicker onSelect={handleAddTool}>
+                <Button variant="outline" className="mb-5 border-dashed">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add first step
+                </Button>
+              </ToolPicker>
+
+              <div className="space-y-2">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Quick start</p>
+                <div className="flex flex-wrap justify-center gap-1.5">
+                  {[
+                    { label: "JSON → Base64", steps: ["json-formatter", "base64-encode"] },
+                    { label: "Base64 → JSON", steps: ["base64-decode", "json-formatter"] },
+                    { label: "URL Decode → JSON", steps: ["url-decode", "json-formatter"] },
+                    { label: "Minify CSS → Base64", steps: ["minify-css", "base64-encode"] },
+                    { label: "JSON → YAML", steps: ["json-formatter", "json-yaml-converter"] },
+                  ].map((tpl) => (
+                    <button
+                      key={tpl.label}
+                      onClick={() => tpl.steps.forEach((s) => addPipelineNode(s))}
+                      className="px-2.5 py-1 text-xs rounded-full border border-dashed hover:border-primary hover:text-primary transition-colors"
+                    >
+                      {tpl.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex-1 flex flex-col min-h-0">
+            {/* ── Main area: input + flow + output ── */}
+            <div className="flex-1 flex min-h-0">
+              {/* Left: Input panel */}
+              <div className="w-72 border-r flex flex-col shrink-0">
+                <div className="px-3 py-2 border-b flex items-center justify-between">
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Input</span>
+                  {firstInput && (
+                    <span className="text-[10px] text-muted-foreground font-mono">{firstInput.length} chars</span>
+                  )}
+                </div>
+                <Textarea
+                  value={firstInput || ""}
+                  onChange={(e) => handleUpdateInput(e.target.value)}
+                  placeholder="Paste or type your input here…"
+                  className="flex-1 border-0 rounded-none resize-none text-sm font-mono focus-visible:ring-0 focus-visible:ring-offset-0"
+                />
+              </div>
+
+              {/* Center: Flow nodes */}
+              <div className="flex-1 flex flex-col min-h-0">
+                <ScrollArea className="flex-1">
+                  <div className="p-4 space-y-0">
+                    {nodes.map((node, index) => (
+                      <div key={node.id}>
+                        <FlowNode
+                          node={node}
+                          index={index}
+                          totalSteps={nodes.length}
+                          status={getNodeStatus(index)}
+                          inspected={inspectedIndex === index}
+                          onInspect={() => setInspectedIndex(inspectedIndex === index ? null : index)}
+                          onRemove={() => removePipelineNode(node.id)}
+                          onRun={() => runFromStep(index)}
+                          onDragStart={handleDragStart}
+                          onDragOver={handleDragOver}
+                          onDragEnd={handleDragEnd}
+                          isDragTarget={dragOverIndex === index && dragIndex !== index}
+                        />
+                        {/* Connector with insert button */}
+                        {index < nodes.length - 1 && (
+                          <InsertButton onSelect={(toolId) => handleInsertTool(toolId, index)} />
+                        )}
+                      </div>
+                    ))}
+
+                    {/* Add step at end */}
+                    <div className="pt-2">
+                      <ToolPicker onSelect={handleAddTool}>
+                        <button className="w-full flex items-center justify-center gap-2 py-2 rounded-lg border border-dashed border-muted-foreground/20 text-muted-foreground hover:border-primary hover:text-primary transition-colors text-sm">
+                          <Plus className="h-3.5 w-3.5" />
+                          Add step
+                        </button>
+                      </ToolPicker>
+                    </div>
+                  </div>
+                </ScrollArea>
+
+                {/* Inspect panel (slides up from bottom when a node is selected) */}
+                {inspectedIndex !== null && nodes[inspectedIndex] && (
+                  <InspectPanel
+                    node={nodes[inspectedIndex]}
+                    index={inspectedIndex}
+                    onCopy={copyText}
+                  />
+                )}
+              </div>
+
+              {/* Right: Output panel */}
+              <div className="w-72 border-l flex flex-col shrink-0">
+                <div className="px-3 py-2 border-b flex items-center justify-between">
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Output</span>
+                  <div className="flex items-center gap-1">
+                    {lastOutput && (
+                      <>
+                        <span className="text-[10px] text-muted-foreground font-mono mr-1">{lastOutput.length} chars</span>
+                        <button
+                          onClick={() => copyText(lastOutput, "Output")}
+                          className="p-0.5 text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          <Copy className="h-3 w-3" />
+                        </button>
+                      </>
+                    )}
+                    <button
+                      onClick={() => setShowOutput(!showOutput)}
+                      className="p-0.5 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showOutput ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                    </button>
+                  </div>
+                </div>
+                {showOutput ? (
+                  <ScrollArea className="flex-1">
+                    <pre className={cn(
+                      "p-3 text-sm font-mono whitespace-pre-wrap break-all",
+                      lastOutput?.startsWith("Error:") ? "text-red-400" : lastOutput ? "text-emerald-400" : "text-muted-foreground"
+                    )}>
+                      {lastOutput || (
+                        <span className="italic text-muted-foreground/60">
+                          {nodes.some(n => n.output) ? "Run remaining steps to see final output" : "Run the pipeline to see results here"}
+                        </span>
+                      )}
+                    </pre>
+                  </ScrollArea>
+                ) : (
+                  <div className="flex-1 flex items-center justify-center text-muted-foreground/40">
+                    <EyeOff className="h-5 w-5" />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

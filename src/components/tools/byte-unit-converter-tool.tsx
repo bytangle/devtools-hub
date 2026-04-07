@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react"
-import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { ToolShell } from "@/components/tools/shared/tool-shell"
 import { HardDrive, Copy, ArrowUpDown } from "lucide-react"
 import { ToolComponentProps } from "@/components/workspace/tool-panel"
 import { useWorkspace } from "@/context/workspace-context"
@@ -89,52 +89,45 @@ export function ByteUnitConverterTool({ tabId, initialInput, onOutputChange }: T
   ]
 
   return (
-    <div className="space-y-4 p-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <HardDrive className="h-5 w-5 text-primary" />
-          <h2 className="text-lg font-semibold font-mono">byte_unit_converter</h2>
+    <ToolShell
+      icon={HardDrive}
+      title="Byte Unit Converter"
+    >
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+          <div className="md:col-span-2">
+            <Label className="text-sm mb-2 block">Value</Label>
+            <Input
+              type="number"
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              placeholder="Enter a number..."
+              className="font-mono text-lg"
+            />
+          </div>
+          <div>
+            <Label className="text-sm mb-2 block">Unit</Label>
+            <Select value={fromUnit} onValueChange={(v) => setFromUnit(v as ByteUnit)}>
+              <SelectTrigger className="font-mono">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {units.map(u => (
+                  <SelectItem key={u.unit} value={u.unit}>
+                    {u.unit} ({u.label})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
+
         <div className="flex items-center gap-2">
           <Label className="text-sm">Binary (1024)</Label>
           <Switch checked={useBinary} onCheckedChange={setUseBinary} />
         </div>
-      </div>
 
-      <Card>
-        <CardContent className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-            <div className="md:col-span-2">
-              <Label className="text-sm mb-2 block">Value</Label>
-              <Input
-                type="number"
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                placeholder="Enter a number..."
-                className="font-mono text-lg"
-              />
-            </div>
-            <div>
-              <Label className="text-sm mb-2 block">Unit</Label>
-              <Select value={fromUnit} onValueChange={(v) => setFromUnit(v as ByteUnit)}>
-                <SelectTrigger className="font-mono">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {units.map(u => (
-                    <SelectItem key={u.unit} value={u.unit}>
-                      {u.unit} ({u.label})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="p-4">
+        <div>
           <Label className="text-sm font-medium mb-3 block">Conversions</Label>
           <div className="space-y-2">
             {conversions.map(conv => (
@@ -162,11 +155,9 @@ export function ByteUnitConverterTool({ tabId, initialInput, onOutputChange }: T
               </div>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      <Card>
-        <CardContent className="p-4">
+        <div>
           <Label className="text-sm font-medium mb-3 block">Common Sizes</Label>
           <div className="flex flex-wrap gap-2">
             {commonSizes.map(size => (
@@ -184,11 +175,9 @@ export function ByteUnitConverterTool({ tabId, initialInput, onOutputChange }: T
               </Button>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      <Card>
-        <CardContent className="p-4">
+        <div>
           <Label className="text-sm font-medium mb-3 block">Reference</Label>
           <div className="grid grid-cols-2 gap-4 text-xs">
             <div className="p-3 rounded bg-muted/30">
@@ -210,8 +199,8 @@ export function ByteUnitConverterTool({ tabId, initialInput, onOutputChange }: T
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </div>
+    </ToolShell>
   )
 }

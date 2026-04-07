@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ToolShell } from "@/components/tools/shared/tool-shell"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
@@ -98,93 +98,75 @@ export function PasswordGeneratorTool({ tabId, onOutputChange }: ToolComponentPr
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Lock className="h-5 w-5 text-primary" />
-        <h2 className="text-lg font-semibold">Password Generator</h2>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Settings</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label className="text-sm">Length: {length[0]}</Label>
-              <Slider
-                value={length}
-                onValueChange={setLength}
-                max={64}
-                min={4}
-                step={1}
-              />
+    <ToolShell
+      icon={Lock}
+      title="Password Generator"
+      actions={<>
+        <Button size="sm" onClick={generatePassword} className="bg-gradient-primary">
+          <RefreshCw className="h-3 w-3 mr-1" />
+          Generate
+        </Button>
+        <Button size="sm" onClick={generateMultiple} variant="outline">
+          Generate 5
+        </Button>
+      </>}
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        {/* Settings */}
+        <div className="rounded-lg border border-border/60 p-4 space-y-4 bg-card">
+          <div className="space-y-2">
+            <Label className="text-sm">Length: {length[0]}</Label>
+            <Slider value={length} onValueChange={setLength} max={64} min={4} step={1} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex items-center space-x-2">
+              <Checkbox id="uppercase" checked={includeUppercase} onCheckedChange={(c) => setIncludeUppercase(c === true)} />
+              <Label htmlFor="uppercase" className="text-sm">A-Z</Label>
             </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="flex items-center space-x-2">
-                <Checkbox id="uppercase" checked={includeUppercase} onCheckedChange={(c) => setIncludeUppercase(c === true)} />
-                <Label htmlFor="uppercase" className="text-sm">A-Z</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox id="lowercase" checked={includeLowercase} onCheckedChange={(c) => setIncludeLowercase(c === true)} />
-                <Label htmlFor="lowercase" className="text-sm">a-z</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox id="numbers" checked={includeNumbers} onCheckedChange={(c) => setIncludeNumbers(c === true)} />
-                <Label htmlFor="numbers" className="text-sm">0-9</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox id="symbols" checked={includeSymbols} onCheckedChange={(c) => setIncludeSymbols(c === true)} />
-                <Label htmlFor="symbols" className="text-sm">!@#$</Label>
-              </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox id="lowercase" checked={includeLowercase} onCheckedChange={(c) => setIncludeLowercase(c === true)} />
+              <Label htmlFor="lowercase" className="text-sm">a-z</Label>
             </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox id="numbers" checked={includeNumbers} onCheckedChange={(c) => setIncludeNumbers(c === true)} />
+              <Label htmlFor="numbers" className="text-sm">0-9</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox id="symbols" checked={includeSymbols} onCheckedChange={(c) => setIncludeSymbols(c === true)} />
+              <Label htmlFor="symbols" className="text-sm">!@#$</Label>
+            </div>
+          </div>
+        </div>
 
+        {/* Output */}
+        <div className="space-y-3">
+          <div className="rounded-lg border border-primary/15 p-4 bg-card space-y-3">
+            <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Output
+            </div>
             <div className="flex gap-2">
-              <Button size="sm" onClick={generatePassword} className="bg-gradient-primary">
-                <RefreshCw className="h-3 w-3 mr-1" />
-                Generate
-              </Button>
-              <Button size="sm" onClick={generateMultiple} variant="outline">
-                Generate 5
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Generated Password</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex gap-2">
-              <Input 
-                value={password} 
-                readOnly 
-                className="font-mono text-sm"
-                placeholder="Click generate..."
-              />
+              <Input value={password} readOnly className="font-mono text-sm" placeholder="Click generate..." />
               <Button size="icon" variant="outline" onClick={() => copyToClipboard(password)} disabled={!password}>
                 <Copy className="h-4 w-4" />
               </Button>
             </div>
+          </div>
 
-            {passwords.length > 0 && (
-              <div className="space-y-2">
-                <Label className="text-sm">More passwords:</Label>
-                {passwords.map((pwd, i) => (
-                  <div key={i} className="flex gap-2">
-                    <Input value={pwd} readOnly className="font-mono text-xs" />
-                    <Button size="icon" variant="ghost" onClick={() => copyToClipboard(pwd)}>
-                      <Copy className="h-3 w-3" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+          {passwords.length > 0 && (
+            <div className="rounded-lg border border-border/60 p-4 space-y-2 bg-card">
+              <Label className="text-xs text-muted-foreground uppercase tracking-wider">Batch Output</Label>
+              {passwords.map((pwd, i) => (
+                <div key={i} className="flex gap-2">
+                  <Input value={pwd} readOnly className="font-mono text-xs" />
+                  <Button size="icon" variant="ghost" onClick={() => copyToClipboard(pwd)}>
+                    <Copy className="h-3 w-3" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </ToolShell>
   )
 }

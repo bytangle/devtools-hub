@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react"
-import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { ToolShell } from "@/components/tools/shared/tool-shell"
 import { Clock, Copy, Calendar, Play } from "lucide-react"
 import { ToolComponentProps } from "@/components/workspace/tool-panel"
 import { useWorkspace } from "@/context/workspace-context"
@@ -211,26 +211,22 @@ export function CronBuilderTool({ tabId, initialInput, onOutputChange }: ToolCom
   }
 
   return (
-    <div className="space-y-4 p-4">
-      <div className="flex items-center gap-2">
-        <Clock className="h-5 w-5 text-primary" />
-        <h2 className="text-lg font-semibold font-mono">cron_builder</h2>
+    <ToolShell
+      icon={Clock}
+      title="Cron Builder"
+      actions={<>
+        <Button size="sm" variant="outline" onClick={copyCron}>
+          <Copy className="h-3 w-3 mr-1" />
+          Copy
+        </Button>
+      </>}
+    >
+      {/* Cron Expression Display */}
+      <div className="rounded-lg border p-4">
+        <Label className="text-sm font-medium">Cron Expression</Label>
+        <code className="text-2xl font-mono font-bold text-primary block mb-2">{cron}</code>
+        <p className="text-sm text-muted-foreground">{description}</p>
       </div>
-
-      {/* Result */}
-      <Card className="border-primary/30 bg-primary/5">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between mb-2">
-            <Label className="text-sm font-medium">Cron Expression</Label>
-            <Button size="sm" variant="outline" onClick={copyCron}>
-              <Copy className="h-3 w-3 mr-1" />
-              Copy
-            </Button>
-          </div>
-          <code className="text-2xl font-mono font-bold text-primary block mb-2">{cron}</code>
-          <p className="text-sm text-muted-foreground">{description}</p>
-        </CardContent>
-      </Card>
 
       <Tabs value={mode} onValueChange={(v) => setMode(v as typeof mode)}>
         <TabsList>
@@ -240,125 +236,117 @@ export function CronBuilderTool({ tabId, initialInput, onOutputChange }: ToolCom
 
         <TabsContent value="builder" className="space-y-4">
           {/* Presets */}
-          <Card>
-            <CardContent className="p-4">
-              <Label className="text-sm font-medium mb-3 block">Quick Presets</Label>
-              <div className="flex flex-wrap gap-2">
-                {presets.map(p => (
-                  <Button
-                    key={p.cron}
-                    size="sm"
-                    variant="outline"
-                    onClick={() => applyPreset(p.cron)}
-                    className="text-xs"
-                  >
-                    {p.label}
-                  </Button>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <div className="rounded-lg border p-4">
+            <Label className="text-sm font-medium mb-3 block">Quick Presets</Label>
+            <div className="flex flex-wrap gap-2">
+              {presets.map(p => (
+                <Button
+                  key={p.cron}
+                  size="sm"
+                  variant="outline"
+                  onClick={() => applyPreset(p.cron)}
+                  className="text-xs"
+                >
+                  {p.label}
+                </Button>
+              ))}
+            </div>
+          </div>
 
           {/* Builder */}
-          <Card>
-            <CardContent className="p-4">
-              <Label className="text-sm font-medium mb-3 block">Custom Builder</Label>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                <div>
-                  <Label className="text-xs text-muted-foreground mb-1 block">Minute</Label>
-                  <Input
-                    value={minute}
-                    onChange={(e) => setMinute(e.target.value)}
-                    placeholder="0-59"
-                    className="font-mono"
-                  />
-                </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground mb-1 block">Hour</Label>
-                  <Input
-                    value={hour}
-                    onChange={(e) => setHour(e.target.value)}
-                    placeholder="0-23"
-                    className="font-mono"
-                  />
-                </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground mb-1 block">Day (Month)</Label>
-                  <Input
-                    value={dayOfMonth}
-                    onChange={(e) => setDayOfMonth(e.target.value)}
-                    placeholder="1-31"
-                    className="font-mono"
-                  />
-                </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground mb-1 block">Month</Label>
-                  <Input
-                    value={month}
-                    onChange={(e) => setMonth(e.target.value)}
-                    placeholder="1-12"
-                    className="font-mono"
-                  />
-                </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground mb-1 block">Day (Week)</Label>
-                  <Input
-                    value={dayOfWeek}
-                    onChange={(e) => setDayOfWeek(e.target.value)}
-                    placeholder="0-6"
-                    className="font-mono"
-                  />
-                </div>
+          <div className="rounded-lg border p-4">
+            <Label className="text-sm font-medium mb-3 block">Custom Builder</Label>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+              <div>
+                <Label className="text-xs text-muted-foreground mb-1 block">Minute</Label>
+                <Input
+                  value={minute}
+                  onChange={(e) => setMinute(e.target.value)}
+                  placeholder="0-59"
+                  className="font-mono"
+                />
               </div>
-              <div className="mt-3 text-xs text-muted-foreground">
-                <code>*</code> = any, <code>*/n</code> = every n, <code>1-5</code> = range, <code>1,3,5</code> = list
+              <div>
+                <Label className="text-xs text-muted-foreground mb-1 block">Hour</Label>
+                <Input
+                  value={hour}
+                  onChange={(e) => setHour(e.target.value)}
+                  placeholder="0-23"
+                  className="font-mono"
+                />
               </div>
-            </CardContent>
-          </Card>
+              <div>
+                <Label className="text-xs text-muted-foreground mb-1 block">Day (Month)</Label>
+                <Input
+                  value={dayOfMonth}
+                  onChange={(e) => setDayOfMonth(e.target.value)}
+                  placeholder="1-31"
+                  className="font-mono"
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground mb-1 block">Month</Label>
+                <Input
+                  value={month}
+                  onChange={(e) => setMonth(e.target.value)}
+                  placeholder="1-12"
+                  className="font-mono"
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground mb-1 block">Day (Week)</Label>
+                <Input
+                  value={dayOfWeek}
+                  onChange={(e) => setDayOfWeek(e.target.value)}
+                  placeholder="0-6"
+                  className="font-mono"
+                />
+              </div>
+            </div>
+            <div className="mt-3 text-xs text-muted-foreground">
+              <code>*</code> = any, <code>*/n</code> = every n, <code>1-5</code> = range, <code>1,3,5</code> = list
+            </div>
+          </div>
         </TabsContent>
 
         <TabsContent value="manual">
-          <Card>
-            <CardContent className="p-4">
-              <Label className="text-sm font-medium mb-2 block">Enter Cron Expression</Label>
-              <div className="flex gap-2">
-                <Input
-                  value={manualInput}
-                  onChange={(e) => setManualInput(e.target.value)}
-                  placeholder="* * * * *"
-                  className="font-mono"
-                />
-                <Button onClick={applyManual}>
-                  <Play className="h-4 w-4 mr-1" />
-                  Apply
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="rounded-lg border p-4">
+            <Label className="text-sm font-medium mb-2 block">Enter Cron Expression</Label>
+            <div className="flex gap-2">
+              <Input
+                value={manualInput}
+                onChange={(e) => setManualInput(e.target.value)}
+                placeholder="* * * * *"
+                className="font-mono"
+              />
+              <Button onClick={applyManual}>
+                <Play className="h-4 w-4 mr-1" />
+                Apply
+              </Button>
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
 
       {/* Next Runs */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <Calendar className="h-4 w-4 text-primary" />
-            <Label className="text-sm font-medium">Next Scheduled Runs</Label>
-          </div>
-          <div className="space-y-2">
-            {nextRuns.length > 0 ? (
-              nextRuns.map((run, i) => (
-                <div key={i} className="flex items-center gap-3 text-sm">
-                  <Badge variant="outline" className="w-6 h-6 p-0 justify-center">{i + 1}</Badge>
-                  <span className="font-mono">{run.toLocaleString()}</span>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-muted-foreground">No upcoming runs found</p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+      <div className="rounded-lg border p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <Calendar className="h-4 w-4 text-primary" />
+          <Label className="text-sm font-medium">Next Scheduled Runs</Label>
+        </div>
+        <div className="space-y-2">
+          {nextRuns.length > 0 ? (
+            nextRuns.map((run, i) => (
+              <div key={i} className="flex items-center gap-3 text-sm">
+                <Badge variant="outline" className="w-6 h-6 p-0 justify-center">{i + 1}</Badge>
+                <span className="font-mono">{run.toLocaleString()}</span>
+              </div>
+            ))
+          ) : (
+            <p className="text-sm text-muted-foreground">No upcoming runs found</p>
+          )}
+        </div>
+      </div>
+    </ToolShell>
   )
 }

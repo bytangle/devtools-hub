@@ -1,8 +1,8 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Copy, Download, Upload, RotateCcw } from "lucide-react"
+import { Copy, Download, Upload, RotateCcw, Check } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { cn } from "@/lib/utils"
 
 interface CodeEditorProps {
   value: string
@@ -12,155 +12,134 @@ interface CodeEditorProps {
   readOnly?: boolean
   title?: string
   error?: string
+  className?: string
+  rows?: number
 }
 
 function SyntaxHighlighter({ content, language }: { content: string; language: string }) {
-  const renderHighlightedContent = () => {
-    const lines = content.split('\n')
-    
-    const highlightLine = (line: string) => {
-      const tokens: { text: string; className?: string }[] = []
-      let remaining = line
-      
-      switch (language) {
-        case 'json':
-          // String keys (property names)
-          remaining = remaining.replace(/("([^"\\]|\\.)*")(\s*:)/g, (match, str, _, colon) => {
-            tokens.push({ text: str, className: 'text-blue-400' }, { text: colon })
-            return '###PROCESSED###'
-          })
-          // String values
-          remaining = remaining.replace(/("([^"\\]|\\.)*")(\s*[,\]\}])/g, (match, str, _, punct) => {
-            tokens.push({ text: str, className: 'text-green-400' }, { text: punct })
-            return '###PROCESSED###'
-          })
-          // Booleans and null
-          remaining = remaining.replace(/\b(true|false|null)\b/g, (match) => {
-            tokens.push({ text: match, className: 'text-purple-400' })
-            return '###PROCESSED###'
-          })
-          // Numbers
-          remaining = remaining.replace(/\b(\d+\.?\d*)\b/g, (match) => {
-            tokens.push({ text: match, className: 'text-orange-400' })
-            return '###PROCESSED###'
-          })
-          // Brackets and braces
-          remaining = remaining.replace(/([{}[\]])/g, (match) => {
-            tokens.push({ text: match, className: 'text-gray-400' })
-            return '###PROCESSED###'
-          })
-          break
-          
-        case 'html':
-        case 'xml':
-          const escapedLine = line.replace(/</g, '&lt;').replace(/>/g, '&gt;')
-          // Tags
-          remaining = escapedLine.replace(/(&lt;\/?)([a-zA-Z][a-zA-Z0-9]*)(.*?)(&gt;)/g, (match, open, tag, attrs, close) => {
-            tokens.push(
-              { text: open, className: 'text-blue-400' },
-              { text: tag, className: 'text-red-400' },
-              { text: attrs, className: 'text-green-400' },
-              { text: close, className: 'text-blue-400' }
-            )
-            return '###PROCESSED###'
-          })
-          // Attributes
-          remaining = remaining.replace(/(\s)([a-zA-Z-]+)(=)(".*?")/g, (match, space, attr, eq, value) => {
-            tokens.push(
-              { text: space },
-              { text: attr, className: 'text-purple-400' },
-              { text: eq, className: 'text-gray-400' },
-              { text: value, className: 'text-green-400' }
-            )
-            return '###PROCESSED###'
-          })
-          break
-          
-        case 'css':
-          // Properties
-          remaining = remaining.replace(/([a-zA-Z-]+)(\s*)(:)/g, (match, prop, space, colon) => {
-            tokens.push(
-              { text: prop, className: 'text-blue-400' },
-              { text: space },
-              { text: colon, className: 'text-gray-400' }
-            )
-            return '###PROCESSED###'
-          })
-          // Values
-          remaining = remaining.replace(/(:)(\s*)([^;{}]+)(;)/g, (match, colon, space, value, semi) => {
-            tokens.push(
-              { text: colon },
-              { text: space },
-              { text: value, className: 'text-green-400' },
-              { text: semi, className: 'text-gray-400' }
-            )
-            return '###PROCESSED###'
-          })
-          // Selectors
-          remaining = remaining.replace(/([.#][a-zA-Z0-9_-]+)/g, (match) => {
-            tokens.push({ text: match, className: 'text-purple-400' })
-            return '###PROCESSED###'
-          })
-          // Braces
-          remaining = remaining.replace(/([{}])/g, (match) => {
-            tokens.push({ text: match, className: 'text-gray-400' })
-            return '###PROCESSED###'
-          })
-          break
-          
-        case 'sql':
-          // Keywords
-          const keywords = /\b(SELECT|FROM|WHERE|INSERT|UPDATE|DELETE|CREATE|TABLE|INDEX|DROP|ALTER|AND|OR|NOT|IN|EXISTS|LIKE|BETWEEN|ORDER|BY|GROUP|HAVING|LIMIT|OFFSET|JOIN|LEFT|RIGHT|INNER|OUTER|ON|AS|UNION|DISTINCT|COUNT|SUM|AVG|MAX|MIN|NULL|TRUE|FALSE)\b/gi
-          remaining = remaining.replace(keywords, (match) => {
-            tokens.push({ text: match, className: 'text-blue-400' })
-            return '###PROCESSED###'
-          })
-          // Strings
-          remaining = remaining.replace(/('([^'\\]|\\.)*')/g, (match) => {
-            tokens.push({ text: match, className: 'text-green-400' })
-            return '###PROCESSED###'
-          })
-          // Numbers
-          remaining = remaining.replace(/\b(\d+\.?\d*)\b/g, (match) => {
-            tokens.push({ text: match, className: 'text-orange-400' })
-            return '###PROCESSED###'
-          })
-          break
+  const tokenizeLine = (line: string): JSX.Element[] => {
+    // Collect all token spans with their positions
+    const spans: { start: number; end: number; text: string; className?: string }[] = []
+
+    const addMatches = (regex: RegExp, className?: string) => {
+      for (const m of line.matchAll(regex)) {
+        if (m.index == null) continue
+        spans.push({ start: m.index, end: m.index + m[0].length, text: m[0], className })
       }
-      
-      // Add remaining text
-      const parts = remaining.split('###PROCESSED###')
-      const result: JSX.Element[] = []
-      let tokenIndex = 0
-      
-      parts.forEach((part, partIndex) => {
-        if (part) {
-          result.push(<span key={`part-${partIndex}`}>{part}</span>)
-        }
-        if (tokenIndex < tokens.length) {
-          const token = tokens[tokenIndex]
-          result.push(
-            <span key={`token-${tokenIndex}`} className={token.className}>
-              {token.text}
-            </span>
-          )
-          tokenIndex++
-        }
-      })
-      
-      return result
     }
-    
-    return lines.map((line, index) => (
-      <div key={index}>
-        {highlightLine(line)}
-      </div>
-    ))
+
+    // Collect groups from a regex where each capture group gets its own class
+    const addGroupMatches = (regex: RegExp, classNames: (string | undefined)[]) => {
+      for (const m of line.matchAll(regex)) {
+        if (m.index == null) continue
+        let pos = m.index
+        for (let i = 1; i < m.length && i - 1 < classNames.length; i++) {
+          if (m[i] != null) {
+            spans.push({ start: pos, end: pos + m[i].length, text: m[i], className: classNames[i - 1] })
+            pos += m[i].length
+          }
+        }
+      }
+    }
+
+    switch (language) {
+      case 'json':
+        // Property keys + colon
+        addGroupMatches(/("(?:[^"\\]|\\.)*")(\s*:)/g, ['text-blue-400', 'text-gray-400'])
+        // String values (standalone — not followed by colon)
+        addMatches(/(?<=:\s*)("(?:[^"\\]|\\.)*")/g, 'text-green-400')
+        // String values in arrays
+        addMatches(/(?<=[\[,]\s*)("(?:[^"\\]|\\.)*")/g, 'text-green-400')
+        // Booleans and null
+        addMatches(/\b(true|false|null)\b/g, 'text-purple-400')
+        // Numbers
+        addMatches(/(?<=:\s*)-?\d+\.?\d*(?=\s*[,\}\]\n])/g, 'text-orange-400')
+        // Brackets
+        addMatches(/[{}\[\]]/g, 'text-gray-400')
+        break
+
+      case 'css':
+        // Selectors (class, id, element, pseudo)
+        addMatches(/^(\s*)([.#]?[a-zA-Z][a-zA-Z0-9_-]*(?:\s*,\s*[.#]?[a-zA-Z][a-zA-Z0-9_-]*)*)(?=\s*\{)/gm, 'text-purple-400')
+        // Property: value pairs
+        addGroupMatches(/([a-zA-Z-]+)(\s*:\s*)([^;{}]+)(;?)/g, ['text-blue-400', 'text-gray-400', 'text-green-400', 'text-gray-400'])
+        // Braces
+        addMatches(/[{}]/g, 'text-gray-400')
+        break
+
+      case 'html':
+      case 'xml':
+        // Tags: <tagname ... >
+        addGroupMatches(/(<\/?)([a-zA-Z][a-zA-Z0-9]*)/g, ['text-blue-400', 'text-red-400'])
+        // Closing >
+        addMatches(/\/?>/g, 'text-blue-400')
+        // Attribute names
+        addMatches(/\s([a-zA-Z-]+)(?==)/g, 'text-purple-400')
+        // Attribute values
+        addMatches(/"[^"]*"|'[^']*'/g, 'text-green-400')
+        break
+
+      case 'sql':
+        addMatches(/\b(SELECT|FROM|WHERE|INSERT|UPDATE|DELETE|CREATE|TABLE|INDEX|DROP|ALTER|AND|OR|NOT|IN|EXISTS|LIKE|BETWEEN|ORDER|BY|GROUP|HAVING|LIMIT|OFFSET|JOIN|LEFT|RIGHT|INNER|OUTER|ON|AS|UNION|DISTINCT|COUNT|SUM|AVG|MAX|MIN|NULL|TRUE|FALSE|SET|INTO|VALUES|IS|CASE|WHEN|THEN|ELSE|END|ASC|DESC|PRIMARY|KEY|FOREIGN|REFERENCES|CONSTRAINT|DEFAULT|CHECK|UNIQUE|WITH)\b/gi, 'text-blue-400')
+        addMatches(/'(?:[^'\\]|\\.)*'/g, 'text-green-400')
+        addMatches(/\b\d+\.?\d*\b/g, 'text-orange-400')
+        addMatches(/--.*$/gm, 'text-gray-500')
+        break
+
+      case 'yaml':
+        // Keys
+        addMatches(/^(\s*[a-zA-Z0-9_.-]+)(?=\s*:)/gm, 'text-blue-400')
+        // Strings
+        addMatches(/"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g, 'text-green-400')
+        // Booleans/null
+        addMatches(/\b(true|false|null|yes|no)\b/gi, 'text-purple-400')
+        // Numbers
+        addMatches(/(?<=:\s*)-?\d+\.?\d*\b/g, 'text-orange-400')
+        // Comments
+        addMatches(/#.*$/gm, 'text-gray-500')
+        break
+
+      case 'graphql':
+        addMatches(/\b(query|mutation|subscription|fragment|on|type|input|enum|interface|union|scalar|schema|extend|implements|directive)\b/g, 'text-blue-400')
+        addMatches(/"(?:[^"\\]|\\.)*"/g, 'text-green-400')
+        addMatches(/\b\d+\.?\d*\b/g, 'text-orange-400')
+        addMatches(/[{}()\[\]]/g, 'text-gray-400')
+        addMatches(/#.*$/gm, 'text-gray-500')
+        break
+    }
+
+    // Sort spans by start position; remove overlapping
+    spans.sort((a, b) => a.start - b.start || b.end - a.end)
+    const merged: typeof spans = []
+    for (const s of spans) {
+      if (merged.length && s.start < merged[merged.length - 1].end) continue // skip overlapping
+      merged.push(s)
+    }
+
+    // Build JSX elements by interleaving plain text and colored spans
+    const result: JSX.Element[] = []
+    let cursor = 0
+    merged.forEach((span, i) => {
+      if (span.start > cursor) {
+        result.push(<span key={`t${i}`}>{line.slice(cursor, span.start)}</span>)
+      }
+      result.push(<span key={`s${i}`} className={span.className}>{span.text}</span>)
+      cursor = span.end
+    })
+    if (cursor < line.length) {
+      result.push(<span key="end">{line.slice(cursor)}</span>)
+    }
+    if (result.length === 0) {
+      result.push(<span key="empty">{line || '\n'}</span>)
+    }
+    return result
   }
 
   return (
-    <pre className="w-full h-80 p-4 bg-background overflow-auto font-mono text-sm whitespace-pre-wrap break-words">
-      {renderHighlightedContent()}
+    <pre className="w-full h-full min-h-[18rem] p-3 bg-transparent overflow-auto font-mono text-sm whitespace-pre-wrap break-words text-foreground/90">
+      {content.split('\n').map((line, index) => (
+        <div key={index}>{tokenizeLine(line)}</div>
+      ))}
     </pre>
   )
 }
@@ -172,23 +151,21 @@ export function CodeEditor({
   language = "json",
   readOnly = false,
   title,
-  error
+  error,
+  className,
+  rows,
 }: CodeEditorProps) {
   const { toast } = useToast()
+  const [copied, setCopied] = useState(false)
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(value)
-      toast({
-        title: "Copied to clipboard",
-        description: "Content has been copied successfully",
-      })
-    } catch (err) {
-      toast({
-        title: "Copy failed",
-        description: "Failed to copy content to clipboard",
-        variant: "destructive",
-      })
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+      toast({ title: "Copied to clipboard" })
+    } catch {
+      toast({ title: "Copy failed", variant: "destructive" })
     }
   }
 
@@ -197,16 +174,13 @@ export function CodeEditor({
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `formatted-${language}.${language === 'json' ? 'json' : 'txt'}`
+    const ext = language === 'json' ? 'json' : language === 'html' ? 'html' : language === 'css' ? 'css' : language === 'sql' ? 'sql' : 'txt'
+    a.download = `output.${ext}`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
-    
-    toast({
-      title: "Downloaded",
-      description: "File has been downloaded successfully",
-    })
+    toast({ title: "Downloaded" })
   }
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -221,46 +195,65 @@ export function CodeEditor({
     }
   }
 
-  const handleClear = () => {
-    onChange("")
-  }
+  const stats = value ? `${value.length.toLocaleString()} chars · ${value.split('\n').length} lines` : ''
 
   return (
-    <Card className="w-full">
-      <div className="flex items-center justify-between p-3 border-b bg-muted/20">
-        <h3 className="text-sm font-medium text-foreground">
-          {title || `${language.toUpperCase()} Editor`}
-        </h3>
-        <div className="flex items-center space-x-1">
+    <div className={cn(
+      "flex flex-col rounded-lg border overflow-hidden",
+      readOnly ? "border-primary/15 bg-card" : "border-border/60 bg-card",
+      error && "border-red-500/40",
+      className,
+    )}>
+      {/* Header */}
+      <div className={cn(
+        "flex items-center justify-between px-3 py-1.5 border-b",
+        readOnly ? "bg-primary/[0.03]" : "bg-muted/30",
+      )}>
+        <div className="flex items-center gap-2">
+          <span className={cn(
+            "text-[11px] font-semibold uppercase tracking-wider",
+            readOnly ? "text-primary/70" : "text-muted-foreground",
+          )}>
+            {title || (readOnly ? "Output" : "Input")}
+          </span>
+          {language && language !== "text" && (
+            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+              {language.toUpperCase()}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-0.5">
           {!readOnly && (
             <>
-              <Button variant="ghost" size="sm" onClick={handleClear}>
-                <RotateCcw className="h-4 w-4" />
+              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onChange("")} title="Clear">
+                <RotateCcw className="h-3 w-3" />
               </Button>
               <label>
-                <Button variant="ghost" size="sm" asChild>
-                  <span>
-                    <Upload className="h-4 w-4" />
-                  </span>
+                <Button variant="ghost" size="icon" className="h-6 w-6" asChild title="Upload">
+                  <span><Upload className="h-3 w-3" /></span>
                 </Button>
-                <input
-                  type="file"
-                  className="hidden"
-                  accept=".json,.txt,.xml,.html,.css,.js"
-                  onChange={handleFileUpload}
-                />
+                <input type="file" className="hidden" accept=".json,.txt,.xml,.html,.css,.js,.sql,.yaml,.yml,.csv,.md" onChange={handleFileUpload} />
               </label>
             </>
           )}
-          <Button variant="ghost" size="sm" onClick={handleCopy} disabled={!value}>
-            <Copy className="h-4 w-4" />
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn("h-6 w-6", copied && "text-emerald-500")}
+            onClick={handleCopy}
+            disabled={!value}
+            title="Copy"
+          >
+            {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
           </Button>
-          <Button variant="ghost" size="sm" onClick={handleDownload} disabled={!value}>
-            <Download className="h-4 w-4" />
+          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleDownload} disabled={!value} title="Download">
+            <Download className="h-3 w-3" />
           </Button>
         </div>
       </div>
-      <div className="relative">
+
+      {/* Editor body */}
+      <div className="relative flex-1 min-h-0">
         {readOnly && value ? (
           <SyntaxHighlighter content={value} language={language} />
         ) : (
@@ -269,18 +262,27 @@ export function CodeEditor({
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
             readOnly={readOnly}
-            className={`w-full h-80 p-4 bg-background border-0 resize-none font-mono text-sm focus:outline-none focus:ring-0 ${
-              error ? 'border-destructive' : ''
-            }`}
+            rows={rows}
+            className={cn(
+              "w-full p-3 bg-transparent border-0 resize-none font-mono text-sm focus:outline-none focus:ring-0 text-foreground placeholder:text-muted-foreground/50",
+              rows ? "" : "h-full min-h-[18rem]",
+            )}
             spellCheck={false}
           />
         )}
         {error && (
-          <div className="absolute bottom-2 left-2 right-2 p-2 bg-destructive/10 border border-destructive/20 rounded text-xs text-destructive">
+          <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5 bg-red-500/10 border-t border-red-500/20 text-[11px] text-red-400 font-mono">
             {error}
           </div>
         )}
       </div>
-    </Card>
+
+      {/* Stats footer */}
+      {stats && (
+        <div className="px-3 py-1 border-t bg-muted/20 flex items-center justify-end">
+          <span className="text-[10px] font-mono text-muted-foreground">{stats}</span>
+        </div>
+      )}
+    </div>
   )
 }

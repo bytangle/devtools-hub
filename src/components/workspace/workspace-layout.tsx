@@ -12,6 +12,7 @@ export function WorkspaceLayout() {
   const { 
     layoutMode, 
     sidebarOpen, 
+    toggleSidebar,
     sidebarWidth,
     tabs,
     activeTabId,
@@ -68,14 +69,22 @@ export function WorkspaceLayout() {
     <div className="h-screen flex flex-col bg-background overflow-hidden">
       <WorkspaceHeader />
       
-      <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar */}
+      <div className="flex-1 flex overflow-hidden relative">
+        {/* Sidebar - overlay on mobile, side panel on desktop */}
+        {sidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+            onClick={toggleSidebar}
+          />
+        )}
         <div 
           className={cn(
-            "border-r border-border/50 bg-sidebar transition-all duration-200 flex-shrink-0 overflow-hidden",
-            sidebarOpen ? "w-60" : "w-0"
+            "border-r border-border/50 bg-sidebar flex-shrink-0 overflow-hidden z-40 transition-all duration-200",
+            // Mobile: overlay drawer
+            "fixed lg:relative inset-y-0 left-0 lg:inset-auto",
+            sidebarOpen ? "w-60 translate-x-0" : "w-0 -translate-x-full lg:translate-x-0"
           )}
-          style={{ width: sidebarOpen ? sidebarWidth : 0 }}
+          style={{ width: sidebarOpen ? (typeof sidebarWidth === 'number' ? sidebarWidth : 240) : 0 }}
         >
           {sidebarOpen && <ToolSidebar />}
         </div>

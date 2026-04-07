@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react"
 import { CodeEditor } from "@/components/ui/code-editor"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Hash, Zap, Copy, Check } from "lucide-react"
+import { ToolShell, TwoPanelLayout } from "@/components/tools/shared/tool-shell"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Hash, Zap, Copy, Check, Trash2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { ToolComponentProps } from "@/components/workspace/tool-panel"
 import { useWorkspace } from "@/context/workspace-context"
@@ -115,7 +116,7 @@ export function HashGeneratorTool({ tabId, initialInput, onOutputChange }: ToolC
   const { getToolState, setToolState } = useWorkspace()
   const savedState = getToolState(tabId)
   
-  const [input, setInput] = useState(savedState?.input as string || initialInput || "")
+  const [input, setInput] = useState(initialInput || savedState?.input as string || "")
   const [hashes, setHashes] = useState<{md5: string, sha1: string, sha256: string, sha512: string}>({
     md5: "", sha1: "", sha256: "", sha512: ""
   })
@@ -175,58 +176,63 @@ export function HashGeneratorTool({ tabId, initialInput, onOutputChange }: ToolC
   ]
 
   return (
-    <div className="space-y-4 p-4">
-      <div className="flex items-center gap-2">
-        <Hash className="h-5 w-5 text-primary" />
-        <h2 className="text-lg font-semibold font-mono">hash_generator</h2>
-      </div>
-
-      <Card>
-        <CardContent className="p-3 flex items-center gap-3">
-          <Button size="sm" onClick={generateHashes} className="bg-primary hover:bg-primary/90">
-            <Zap className="h-3 w-3 mr-1" />
-            Generate Hashes
-          </Button>
-          <span className="text-xs text-muted-foreground font-mono">
-            {input.length} chars · {new Blob([input]).size} bytes
-          </span>
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <CodeEditor 
-          value={input} 
-          onChange={setInput} 
-          placeholder="Enter text to hash..." 
-          language="text" 
-          title="Input" 
-        />
-        
-        <Card>
-          <CardContent className="p-4 space-y-3">
-            {hashTypes.map(({ name, value, bits }) => (
-              <div key={name} className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <p className="text-xs font-mono font-medium text-muted-foreground">{name} <span className="text-[10px]">({bits}-bit)</span></p>
-                  {value && (
-                    <Button 
-                      size="sm" 
-                      variant="ghost" 
-                      className="h-6 px-2 text-xs"
-                      onClick={() => copyToClipboard(value, name)}
-                    >
-                      {copiedField === name ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
-                    </Button>
-                  )}
+    <ToolShell
+      icon={Hash}
+      title="Hash Generator"
+      actions={<>
+        <span className="text-xs text-muted-foreground font-mono">
+          {input.length} chars · {new Blob([input]).size} bytes
+        </span>
+      </>}
+    >
+      <TooltipProvider delayDuration={200}>
+        <TwoPanelLayout
+          input={<CodeEditor value={input} onChange={setInput} placeholder="Enter text to hash..." language="text" title="Input" />}
+          actions={<>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="icon" onClick={generateHashes} className="h-8 w-8 rounded-full bg-gradient-primary text-primary-foreground shadow-sm">
+                  <Zap className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right"><p>Generate hashes</p></TooltipContent>
+            </Tooltip>
+            <div className="w-4 h-px md:w-px md:h-4 bg-border/60" />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="icon" variant="ghost" onClick={() => { setInput(""); setHashes({ md5: "", sha1: "", sha256: "", sha512: "" }) }} className="h-7 w-7 rounded-full text-muted-foreground">
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right"><p>Clear all</p></TooltipContent>
+            </Tooltip>
+          </>}
+          output={
+            <div className="rounded-lg border p-4 space-y-3 h-full overflow-auto">
+              {hashTypes.map(({ name, value, bits }) => (
+                <div key={name} className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-mono font-medium text-muted-foreground">{name} <span className="text-[10px]">({bits}-bit)</span></p>
+                    {value && (
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="h-6 px-2 text-xs"
+                        onClick={() => copyToClipboard(value, name)}
+                      >
+                        {copiedField === name ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
+                      </Button>
+                    )}
+                  </div>
+                  <code className="block text-xs bg-muted p-2 rounded font-mono break-all min-h-[2rem]">
+                    {value || <span className="text-muted-foreground">—</span>}
+                  </code>
                 </div>
-                <code className="block text-xs bg-muted p-2 rounded font-mono break-all min-h-[2rem]">
-                  {value || <span className="text-muted-foreground">—</span>}
-                </code>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+              ))}
+            </div>
+          }
+        />
+      </TooltipProvider>
+    </ToolShell>
   )
 }

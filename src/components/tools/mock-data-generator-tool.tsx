@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
-import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { ToolShell } from "@/components/tools/shared/tool-shell"
 import { Sparkles, Copy, RefreshCw, Download } from "lucide-react"
 import { ToolComponentProps } from "@/components/workspace/tool-panel"
 import { useWorkspace } from "@/context/workspace-context"
@@ -183,91 +183,85 @@ export function MockDataGeneratorTool({ tabId, onOutputChange }: ToolComponentPr
   }
 
   return (
-    <div className="space-y-4 p-4">
-      <div className="flex items-center gap-2">
-        <Sparkles className="h-5 w-5 text-primary" />
-        <h2 className="text-lg font-semibold font-mono">mock_data_generator</h2>
-      </div>
-
-      <Card>
-        <CardContent className="p-4 space-y-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div>
-              <Label className="text-sm mb-2 block">Data Type</Label>
-              <Select value={dataType} onValueChange={(v) => setDataType(v as DataType)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="person">Person (Full)</SelectItem>
-                  <SelectItem value="uuid">UUID</SelectItem>
-                  <SelectItem value="email">Email</SelectItem>
-                  <SelectItem value="phone">Phone</SelectItem>
-                  <SelectItem value="address">Address</SelectItem>
-                  <SelectItem value="company">Company</SelectItem>
-                  <SelectItem value="date">Date</SelectItem>
-                  <SelectItem value="ip">IP Address</SelectItem>
-                  <SelectItem value="number">Number</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label className="text-sm mb-2 block">Count</Label>
-              <Input
-                type="number"
-                min={1}
-                max={100}
-                value={count}
-                onChange={(e) => setCount(Math.min(100, Math.max(1, parseInt(e.target.value) || 1)))}
-              />
-            </div>
-            <div className="flex items-end">
-              <Button onClick={generate} className="bg-primary hover:bg-primary/90 w-full">
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Generate
-              </Button>
-            </div>
-            {output.length > 0 && (
-              <div className="flex items-end gap-2">
-                <Button variant="outline" size="sm" onClick={copyOutput}>
-                  <Copy className="h-3 w-3 mr-1" />
-                  Copy
-                </Button>
-                <Button variant="outline" size="sm" onClick={downloadJson}>
-                  <Download className="h-3 w-3 mr-1" />
-                  JSON
-                </Button>
-              </div>
-            )}
+    <ToolShell
+      icon={Sparkles}
+      title="Mock Data Generator"
+      actions={<>
+        <Button size="sm" onClick={generate} className="bg-primary hover:bg-primary/90">
+          <RefreshCw className="h-3 w-3 mr-1" />
+          Generate
+        </Button>
+        {output.length > 0 && (
+          <>
+            <Button variant="outline" size="sm" onClick={copyOutput}>
+              <Copy className="h-3 w-3 mr-1" />
+              Copy
+            </Button>
+            <Button variant="outline" size="sm" onClick={downloadJson}>
+              <Download className="h-3 w-3 mr-1" />
+              JSON
+            </Button>
+          </>
+        )}
+      </>}
+    >
+      <div className="space-y-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          <div>
+            <Label className="text-sm mb-2 block">Data Type</Label>
+            <Select value={dataType} onValueChange={(v) => setDataType(v as DataType)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="person">Person (Full)</SelectItem>
+                <SelectItem value="uuid">UUID</SelectItem>
+                <SelectItem value="email">Email</SelectItem>
+                <SelectItem value="phone">Phone</SelectItem>
+                <SelectItem value="address">Address</SelectItem>
+                <SelectItem value="company">Company</SelectItem>
+                <SelectItem value="date">Date</SelectItem>
+                <SelectItem value="ip">IP Address</SelectItem>
+                <SelectItem value="number">Number</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-          
-          {dataType === 'person' && (
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="sensitive"
-                checked={includeSensitive}
-                onCheckedChange={(c) => setIncludeSensitive(!!c)}
-              />
-              <Label htmlFor="sensitive" className="text-sm cursor-pointer">
-                Include fake credit card numbers
-              </Label>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          <div>
+            <Label className="text-sm mb-2 block">Count</Label>
+            <Input
+              type="number"
+              min={1}
+              max={100}
+              value={count}
+              onChange={(e) => setCount(Math.min(100, Math.max(1, parseInt(e.target.value) || 1)))}
+            />
+          </div>
+        </div>
 
-      {output.length > 0 && (
-        <Card>
-          <CardContent className="p-4">
+        {dataType === 'person' && (
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="sensitive"
+              checked={includeSensitive}
+              onCheckedChange={(c) => setIncludeSensitive(!!c)}
+            />
+            <Label htmlFor="sensitive" className="text-sm cursor-pointer">
+              Include fake credit card numbers
+            </Label>
+          </div>
+        )}
+
+        {output.length > 0 && (
+          <div>
             <Label className="text-sm font-medium mb-3 block">Generated Data ({output.length} items)</Label>
             <ScrollArea className="h-[400px] rounded border">
               <pre className="p-4 text-xs font-mono">
                 {JSON.stringify(output, null, 2)}
               </pre>
             </ScrollArea>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+          </div>
+        )}
+      </div>
+    </ToolShell>
   )
 }

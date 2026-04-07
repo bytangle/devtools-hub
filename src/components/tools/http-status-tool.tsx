@@ -1,10 +1,10 @@
 import { useState, useMemo } from "react"
-import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Globe, Search, Copy } from "lucide-react"
 import { ToolComponentProps } from "@/components/workspace/tool-panel"
 import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
+import { ToolShell } from "@/components/tools/shared/tool-shell"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
@@ -141,87 +141,78 @@ export function HttpStatusTool({ tabId }: ToolComponentProps) {
   }
 
   return (
-    <div className="space-y-4 p-4">
-      <div className="flex items-center gap-2">
-        <Globe className="h-5 w-5 text-primary" />
-        <h2 className="text-lg font-semibold font-mono">http_status_codes</h2>
+    <ToolShell
+      icon={Globe}
+      title="HTTP Status Codes"
+    >
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search by code, name, or description..."
+          className="pl-9"
+        />
       </div>
-
-      <Card>
-        <CardContent className="p-4 space-y-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by code, name, or description..."
-              className="pl-9"
-            />
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button 
-              size="sm" 
-              variant={selectedCategory === 'all' ? 'default' : 'outline'}
-              onClick={() => setSelectedCategory('all')}
-            >
-              All
-            </Button>
-            {Object.entries(categoryLabels).map(([cat, label]) => (
-              <Button
-                key={cat}
-                size="sm"
-                variant={selectedCategory === cat ? 'default' : 'outline'}
-                onClick={() => setSelectedCategory(cat as StatusCode['category'])}
-              >
-                {label}
-              </Button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
+      <div className="flex flex-wrap gap-2">
+        <Button
+          size="sm"
+          variant={selectedCategory === 'all' ? 'default' : 'outline'}
+          onClick={() => setSelectedCategory('all')}
+        >
+          All
+        </Button>
+        {Object.entries(categoryLabels).map(([cat, label]) => (
+          <Button
+            key={cat}
+            size="sm"
+            variant={selectedCategory === cat ? 'default' : 'outline'}
+            onClick={() => setSelectedCategory(cat as StatusCode['category'])}
+          >
+            {label}
+          </Button>
+        ))}
+      </div>
       <ScrollArea className="h-[500px]">
         <div className="space-y-4">
           {Object.entries(groupedCodes).map(([category, codes]) => {
             if (codes.length === 0) return null
             return (
-              <Card key={category}>
-                <CardContent className="p-4">
-                  <h3 className={`text-sm font-medium mb-3 ${categoryColors[category as StatusCode['category']]?.split(' ')[1]}`}>
-                    {categoryLabels[category as StatusCode['category']]}
-                  </h3>
-                  <div className="space-y-2">
-                    {codes.map(sc => (
-                      <div 
-                        key={sc.code}
-                        className="flex items-start gap-3 p-2 rounded hover:bg-muted/50 transition-colors group"
-                      >
-                        <Badge className={`${categoryColors[sc.category]} font-mono min-w-[3rem] justify-center`}>
-                          {sc.code}
-                        </Badge>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">{sc.text}</span>
-                            <Button 
-                              size="sm" 
-                              variant="ghost" 
-                              className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0"
-                              onClick={() => copyCode(sc)}
-                            >
-                              <Copy className="h-3 w-3" />
-                            </Button>
-                          </div>
-                          <p className="text-sm text-muted-foreground">{sc.description}</p>
+              <div key={category} className="rounded-lg border p-4">
+                <h3 className={`text-sm font-medium mb-3 ${categoryColors[category as StatusCode['category']]?.split(' ')[1]}`}>
+                  {categoryLabels[category as StatusCode['category']]}
+                </h3>
+                <div className="space-y-2">
+                  {codes.map(sc => (
+                    <div
+                      key={sc.code}
+                      className="flex items-start gap-3 p-2 rounded hover:bg-muted/50 transition-colors group"
+                    >
+                      <Badge className={`${categoryColors[sc.category]} font-mono min-w-[3rem] justify-center`}>
+                        {sc.code}
+                      </Badge>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{sc.text}</span>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0"
+                            onClick={() => copyCode(sc)}
+                          >
+                            <Copy className="h-3 w-3" />
+                          </Button>
                         </div>
+                        <p className="text-sm text-muted-foreground">{sc.description}</p>
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )
           })}
         </div>
       </ScrollArea>
-    </div>
+    </ToolShell>
   )
 }

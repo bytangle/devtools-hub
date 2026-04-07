@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react"
-import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { ToolShell } from "@/components/tools/shared/tool-shell"
 import { Key, Copy, Eye, EyeOff, RefreshCw, AlertTriangle } from "lucide-react"
 import { ToolComponentProps } from "@/components/workspace/tool-panel"
 import { useWorkspace } from "@/context/workspace-context"
@@ -148,25 +148,17 @@ export function JwtGeneratorTool({ tabId, onOutputChange }: ToolComponentProps) 
   const tokenParts = token.split('.')
 
   return (
-    <div className="space-y-4 p-4">
-      <div className="flex items-center gap-2">
-        <Key className="h-5 w-5 text-primary" />
-        <h2 className="text-lg font-semibold font-mono">jwt_generator</h2>
-      </div>
-
-      <Card className="border-yellow-500/30 bg-yellow-500/5">
-        <CardContent className="p-3 flex items-center gap-2">
-          <AlertTriangle className="h-4 w-4 text-yellow-600" />
+    <ToolShell
+      icon={Key}
+      title="JWT Generator"
+      actions={<><AlertTriangle className="h-4 w-4 text-yellow-600" />
           <span className="text-xs text-yellow-700 dark:text-yellow-400">
             This tool is for testing only. Never use test secrets in production.
-          </span>
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          </span></>}
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         <div className="space-y-4">
-          <Card>
-            <CardContent className="p-4 space-y-4">
+          <div className="rounded-lg border p-4 space-y-4">
               <div>
                 <Label className="text-sm mb-2 block">Algorithm</Label>
                 <Select value={algorithm} onValueChange={(v) => setAlgorithm(v as Algorithm)}>
@@ -201,11 +193,9 @@ export function JwtGeneratorTool({ tabId, onOutputChange }: ToolComponentProps) 
                   </Button>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+          </div>
 
-          <Card>
-            <CardContent className="p-4">
+          <div className="rounded-lg border p-4">
               <div className="flex items-center justify-between mb-2">
                 <Label className="text-sm">Payload (JSON)</Label>
                 <div className="flex gap-1">
@@ -221,8 +211,7 @@ export function JwtGeneratorTool({ tabId, onOutputChange }: ToolComponentProps) 
                 placeholder='{"sub": "1234567890", "name": "John Doe"}'
                 className="font-mono text-sm min-h-[200px]"
               />
-            </CardContent>
-          </Card>
+          </div>
 
           <Button onClick={generateToken} className="w-full bg-primary hover:bg-primary/90">
             <RefreshCw className="h-4 w-4 mr-2" />
@@ -231,8 +220,7 @@ export function JwtGeneratorTool({ tabId, onOutputChange }: ToolComponentProps) 
         </div>
 
         <div className="space-y-4">
-          <Card>
-            <CardContent className="p-4">
+          <div className="rounded-lg border p-4">
               <div className="flex items-center justify-between mb-2">
                 <Label className="text-sm">Generated Token</Label>
                 {token && (
@@ -260,11 +248,9 @@ export function JwtGeneratorTool({ tabId, onOutputChange }: ToolComponentProps) 
               {error && (
                 <p className="text-xs text-destructive mt-2">{error}</p>
               )}
-            </CardContent>
-          </Card>
+          </div>
 
-          <Card>
-            <CardContent className="p-4">
+          <div className="rounded-lg border p-4">
               <Label className="text-sm mb-3 block">Decoded Token</Label>
               <div className="space-y-3">
                 <div>
@@ -292,10 +278,9 @@ export function JwtGeneratorTool({ tabId, onOutputChange }: ToolComponentProps) 
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+          </div>
         </div>
       </div>
-    </div>
+    </ToolShell>
   )
 }

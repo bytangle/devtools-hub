@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { ToolShell } from "@/components/tools/shared/tool-shell"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -15,7 +15,7 @@ export function RegexTesterTool({ tabId, initialInput, onOutputChange }: ToolCom
   const savedState = getToolState(tabId)
 
   const [pattern, setPattern] = useState(savedState?.pattern || "")
-  const [testString, setTestString] = useState(savedState?.testString || initialInput || "")
+  const [testString, setTestString] = useState(initialInput || savedState?.testString || "")
   const [globalFlag, setGlobalFlag] = useState(savedState?.globalFlag ?? true)
   const [caseInsensitive, setCaseInsensitive] = useState(savedState?.caseInsensitive ?? false)
   const [multiline, setMultiline] = useState(savedState?.multiline ?? false)
@@ -92,107 +92,99 @@ export function RegexTesterTool({ tabId, initialInput, onOutputChange }: ToolCom
   ]
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Search className="h-5 w-5 text-primary" />
-        <h2 className="text-lg font-semibold">Regex Tester</h2>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="space-y-4">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm">Pattern</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex gap-2">
-                <Input
-                  value={pattern}
-                  onChange={(e) => setPattern(e.target.value)}
-                  placeholder="Enter regex pattern"
-                  className={`flex-1 font-mono ${!regexResult.isValid ? 'border-destructive' : ''}`}
-                />
-                <Button size="icon" variant="outline" onClick={() => copyToClipboard(pattern)}>
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </div>
-              
-              {!regexResult.isValid && (
-                <div className="flex items-center gap-2 text-destructive text-sm">
-                  <AlertCircle className="h-4 w-4" />
-                  {regexResult.error}
-                </div>
-              )}
-
-              <div className="flex flex-wrap gap-4">
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="global" checked={globalFlag} onCheckedChange={(c) => setGlobalFlag(c === true)} />
-                  <Label htmlFor="global" className="text-xs">Global (g)</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="case" checked={caseInsensitive} onCheckedChange={(c) => setCaseInsensitive(c === true)} />
-                  <Label htmlFor="case" className="text-xs">Case (i)</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="multi" checked={multiline} onCheckedChange={(c) => setMultiline(c === true)} />
-                  <Label htmlFor="multi" className="text-xs">Multi (m)</Label>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap gap-1">
-                {commonPatterns.map(p => (
-                  <Button key={p.name} size="sm" variant="outline" className="text-xs h-6" onClick={() => setPattern(p.pattern)}>
-                    {p.name}
-                  </Button>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm">Test String</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Textarea
-                value={testString}
-                onChange={(e) => setTestString(e.target.value)}
-                placeholder="Enter text to test against..."
-                className="min-h-[150px] font-mono text-sm"
-              />
-            </CardContent>
-          </Card>
+    <ToolShell
+      icon={Search}
+      title="Regex Tester"
+      actions={
+        <div className="flex flex-wrap gap-1">
+          {commonPatterns.map(p => (
+            <Button key={p.name} size="sm" variant="outline" className="text-xs h-6" onClick={() => setPattern(p.pattern)}>
+              {p.name}
+            </Button>
+          ))}
+        </div>
+      }
+    >
+      <div className="space-y-3">
+        {/* Pattern input */}
+        <div className="rounded-lg border border-border/60 p-3 bg-card space-y-3">
+          <div className="flex gap-2">
+            <Input
+              value={pattern}
+              onChange={(e) => setPattern(e.target.value)}
+              placeholder="Enter regex pattern"
+              className={`flex-1 font-mono ${!regexResult.isValid ? 'border-destructive' : ''}`}
+            />
+            <Button size="icon" variant="outline" onClick={() => copyToClipboard(pattern)}>
+              <Copy className="h-4 w-4" />
+            </Button>
+          </div>
+          {!regexResult.isValid && (
+            <div className="flex items-center gap-2 text-destructive text-sm">
+              <AlertCircle className="h-4 w-4" />
+              {regexResult.error}
+            </div>
+          )}
+          <div className="flex flex-wrap gap-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox id="global" checked={globalFlag} onCheckedChange={(c) => setGlobalFlag(c === true)} />
+              <Label htmlFor="global" className="text-xs">Global (g)</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox id="case" checked={caseInsensitive} onCheckedChange={(c) => setCaseInsensitive(c === true)} />
+              <Label htmlFor="case" className="text-xs">Case (i)</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox id="multi" checked={multiline} onCheckedChange={(c) => setMultiline(c === true)} />
+              <Label htmlFor="multi" className="text-xs">Multi (m)</Label>
+            </div>
+          </div>
         </div>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">
-              Matches ({regexResult.matches.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {regexResult.matches.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No matches found</p>
-            ) : (
-              <div className="space-y-2 max-h-[400px] overflow-y-auto">
-                {regexResult.matches.map((match, i) => (
-                  <div key={i} className="p-2 bg-muted/50 rounded text-sm font-mono">
-                    <div className="flex justify-between">
-                      <span className="text-primary">{match.match}</span>
-                      <span className="text-xs text-muted-foreground">@{match.index}</span>
-                    </div>
-                    {match.groups.length > 0 && (
-                      <div className="text-xs text-muted-foreground mt-1">
-                        Groups: {match.groups.join(", ")}
+        {/* Test string + matches */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          <div className="rounded-lg border border-border/60 overflow-hidden">
+            <div className="px-3 py-1.5 border-b bg-muted/30">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Test String</span>
+            </div>
+            <Textarea
+              value={testString}
+              onChange={(e) => setTestString(e.target.value)}
+              placeholder="Enter text to test against..."
+              className="min-h-[200px] font-mono text-sm border-0 rounded-none focus-visible:ring-0"
+            />
+          </div>
+
+          <div className="rounded-lg border border-primary/15 overflow-hidden">
+            <div className="px-3 py-1.5 border-b bg-primary/[0.03]">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-primary/70">
+                Matches ({regexResult.matches.length})
+              </span>
+            </div>
+            <div className="p-3">
+              {regexResult.matches.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No matches found</p>
+              ) : (
+                <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                  {regexResult.matches.map((match, i) => (
+                    <div key={i} className="p-2 bg-muted/50 rounded text-sm font-mono">
+                      <div className="flex justify-between">
+                        <span className="text-primary">{match.match}</span>
+                        <span className="text-xs text-muted-foreground">@{match.index}</span>
                       </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                      {match.groups.length > 0 && (
+                        <div className="text-xs text-muted-foreground mt-1">
+                          Groups: {match.groups.join(", ")}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </ToolShell>
   )
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { ToolShell } from "@/components/tools/shared/tool-shell"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Link, Copy, Zap } from "lucide-react"
@@ -12,7 +12,7 @@ export function UrlShortenerTool({ tabId, initialInput, onOutputChange }: ToolCo
   const { getToolState, setToolState } = useWorkspace()
   const savedState = getToolState(tabId)
   
-  const [url, setUrl] = useState(savedState?.url || initialInput || "")
+  const [url, setUrl] = useState(initialInput || savedState?.url || "")
   const [shortUrl, setShortUrl] = useState(savedState?.shortUrl || "")
   const [history, setHistory] = useState<{ original: string; short: string }[]>(savedState?.history || [])
   const { toast } = useToast()
@@ -48,49 +48,41 @@ export function UrlShortenerTool({ tabId, initialInput, onOutputChange }: ToolCo
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Link className="h-5 w-5 text-primary" />
-        <h2 className="text-lg font-semibold">URL Shortener</h2>
-      </div>
-
-      <Card>
-        <CardContent className="p-4 space-y-4">
-          <div className="space-y-2">
-            <Label className="text-sm">Original URL</Label>
-            <div className="flex gap-2">
-              <Input 
-                value={url} 
-                onChange={(e) => setUrl(e.target.value)} 
-                placeholder="https://example.com/very/long/url" 
-              />
-              <Button onClick={shortenUrl} className="bg-gradient-primary">
+    <ToolShell
+      icon={Link}
+      title="URL Shortener"
+      actions={<Button onClick={shortenUrl} className="bg-gradient-primary">
                 <Zap className="h-4 w-4 mr-1" />
                 Shorten
-              </Button>
-            </div>
-          </div>
+              </Button>}
+    >
+      <div className="space-y-2">
+        <Label className="text-sm">Original URL</Label>
+        <Input 
+          value={url} 
+          onChange={(e) => setUrl(e.target.value)} 
+          placeholder="https://example.com/very/long/url" 
+        />
+      </div>
 
-          {shortUrl && (
-            <div className="space-y-2">
-              <Label className="text-sm">Shortened URL</Label>
-              <div className="flex gap-2">
-                <Input value={shortUrl} readOnly className="font-mono" />
-                <Button size="icon" variant="outline" onClick={() => copyToClipboard(shortUrl)}>
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {shortUrl && (
+        <div className="space-y-2">
+          <Label className="text-sm">Shortened URL</Label>
+          <div className="flex gap-2">
+            <Input value={shortUrl} readOnly className="font-mono" />
+            <Button size="icon" variant="outline" onClick={() => copyToClipboard(shortUrl)}>
+              <Copy className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       {history.length > 0 && (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Recent URLs</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="rounded-lg border">
+          <div className="p-4 pb-3">
+            <Label className="text-sm font-medium">Recent URLs</Label>
+          </div>
+          <div className="p-4 pt-0">
             <div className="space-y-2">
               {history.map((item, i) => (
                 <div key={i} className="flex items-center gap-2 text-sm">
@@ -102,13 +94,13 @@ export function UrlShortenerTool({ tabId, initialInput, onOutputChange }: ToolCo
                 </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       <p className="text-xs text-muted-foreground text-center">
         Note: This is a demo. In production, URLs would be persisted to a database.
       </p>
-    </div>
+    </ToolShell>
   )
 }

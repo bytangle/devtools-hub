@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { ToolShell } from "@/components/tools/shared/tool-shell"
 import { Textarea } from "@/components/ui/textarea"
 import { Lock, RefreshCw, Copy } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
@@ -13,11 +13,11 @@ interface DecodedJwt {
   signature: string
 }
 
-export function JwtDecoderTool({ tabId, initialInput }: ToolComponentProps) {
+export function JwtDecoderTool({ tabId, initialInput, onOutputChange }: ToolComponentProps) {
   const { getToolState, setToolState } = useWorkspace()
   const savedState = getToolState(tabId)
   
-  const [token, setToken] = useState(savedState?.token || initialInput || "")
+  const [token, setToken] = useState(initialInput || savedState?.token || "")
   const [decoded, setDecoded] = useState<DecodedJwt | null>(null)
   const [error, setError] = useState("")
   const { toast } = useToast()
@@ -25,6 +25,12 @@ export function JwtDecoderTool({ tabId, initialInput }: ToolComponentProps) {
   useEffect(() => {
     setToolState(tabId, { token })
   }, [token, tabId, setToolState])
+
+  useEffect(() => {
+    if (onOutputChange && decoded) {
+      onOutputChange("Header:\n" + JSON.stringify(decoded.header, null, 2) + "\n\nPayload:\n" + JSON.stringify(decoded.payload, null, 2))
+    }
+  }, [decoded, onOutputChange])
 
   const decodeJwt = () => {
     if (!token.trim()) {
@@ -66,22 +72,10 @@ export function JwtDecoderTool({ tabId, initialInput }: ToolComponentProps) {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Lock className="h-5 w-5 text-primary" />
-        <h2 className="text-lg font-semibold">JWT Decoder</h2>
-      </div>
-
-      <Card>
-        <CardContent className="p-3 space-y-3">
-          <Textarea
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-            placeholder="Paste JWT token here..."
-            className="min-h-[100px] font-mono text-sm"
-          />
-          {error && <p className="text-sm text-destructive">{error}</p>}
-          <div className="flex gap-2">
+    <ToolShell
+      icon={Lock}
+      title="JWT Decoder"
+      actions={<div className="flex gap-2">
             <Button size="sm" onClick={decodeJwt} className="bg-gradient-primary">
               Decode JWT
             </Button>
@@ -92,38 +86,44 @@ export function JwtDecoderTool({ tabId, initialInput }: ToolComponentProps) {
               <RefreshCw className="h-3 w-3 mr-1" />
               Clear
             </Button>
-          </div>
-        </CardContent>
-      </Card>
+          </div>}
+    >
+      <Textarea
+        value={token}
+        onChange={(e) => setToken(e.target.value)}
+        placeholder="Paste JWT token here..."
+        className="min-h-[100px] font-mono text-sm"
+      />
+      {error && <p className="text-sm text-destructive">{error}</p>}
 
       {decoded && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm flex justify-between">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          <div className="rounded-lg border">
+            <div className="p-4 pb-2">
+              <div className="text-sm font-medium flex justify-between">
                 Header
                 <Button size="sm" variant="ghost" onClick={() => copyToClipboard(JSON.stringify(decoded.header, null, 2))}>
                   <Copy className="h-3 w-3" />
                 </Button>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+              </div>
+            </div>
+            <div className="p-4 pt-0">
               <pre className="bg-muted p-3 rounded text-xs overflow-x-auto">
                 {JSON.stringify(decoded.header, null, 2)}
               </pre>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm flex justify-between">
+          <div className="rounded-lg border">
+            <div className="p-4 pb-2">
+              <div className="text-sm font-medium flex justify-between">
                 Payload
                 <Button size="sm" variant="ghost" onClick={() => copyToClipboard(JSON.stringify(decoded.payload, null, 2))}>
                   <Copy className="h-3 w-3" />
                 </Button>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+              </div>
+            </div>
+            <div className="p-4 pt-0">
               <pre className="bg-muted p-3 rounded text-xs overflow-x-auto">
                 {JSON.stringify(decoded.payload, null, 2)}
               </pre>
@@ -133,10 +133,10 @@ export function JwtDecoderTool({ tabId, initialInput }: ToolComponentProps) {
               {decoded.payload.exp && (
                 <p className="text-xs text-muted-foreground">Expires: {formatTimestamp(decoded.payload.exp)}</p>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       )}
-    </div>
+    </ToolShell>
   )
 }

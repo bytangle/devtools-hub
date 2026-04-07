@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ToolShell } from "@/components/tools/shared/tool-shell"
 import { Input } from "@/components/ui/input"
 import { Zap, Copy, RefreshCw } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
@@ -49,16 +49,10 @@ export function UuidGeneratorTool({ tabId, onOutputChange }: ToolComponentProps)
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Zap className="h-5 w-5 text-primary" />
-        <h2 className="text-lg font-semibold">UUID Generator</h2>
-      </div>
-
-      <Card>
-        <CardContent className="p-3">
-          <div className="flex flex-wrap gap-2">
-            <Button size="sm" onClick={generateUuid} className="bg-gradient-primary">
+    <ToolShell
+      icon={Zap}
+      title="UUID Generator"
+      actions={<><Button size="sm" onClick={generateUuid} className="bg-gradient-primary">
               <RefreshCw className="h-3 w-3 mr-1" />
               Generate UUID
             </Button>
@@ -72,16 +66,13 @@ export function UuidGeneratorTool({ tabId, onOutputChange }: ToolComponentProps)
               <Button size="sm" onClick={copyAll} variant="outline">
                 Copy All
               </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm">Generated UUID</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
+            )}</>}
+    >
+      <div className="rounded-lg border">
+        <div className="p-4 pb-3">
+          <span className="text-sm font-medium">Generated UUID</span>
+        </div>
+        <div className="p-4 pt-0 space-y-3">
           <div className="flex gap-2">
             <Input 
               value={uuid} 
@@ -106,8 +97,8 @@ export function UuidGeneratorTool({ tabId, onOutputChange }: ToolComponentProps)
               ))}
             </div>
           )}
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </div>
+    </ToolShell>
   )
 }

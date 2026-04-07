@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { ToolShell } from "@/components/tools/shared/tool-shell"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -76,66 +76,56 @@ export function LoremGeneratorTool({ tabId, onOutputChange }: ToolComponentProps
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Type className="h-5 w-5 text-primary" />
-        <h2 className="text-lg font-semibold">Lorem Ipsum Generator</h2>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card className="lg:col-span-1">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Settings</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+    <ToolShell
+      icon={Type}
+      title="Lorem Ipsum Generator"
+      actions={<>
+        <Button size="sm" onClick={generate} className="bg-primary hover:bg-primary/90">
+          <RefreshCw className="h-3 w-3 mr-1" />
+          Generate
+        </Button>
+        {output && (
+          <Button size="sm" variant="outline" onClick={copyToClipboard}>
+            <Copy className="h-3 w-3 mr-1" />
+            Copy
+          </Button>
+        )}
+      </>}
+    >
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <Label className="text-sm mb-2 block">Type</Label>
             <div className="flex gap-2">
-              {(["paragraphs", "sentences", "words"] as const).map(t => (
-                <Button 
-                  key={t} 
-                  size="sm" 
-                  variant={type === t ? "default" : "outline"}
+              {(['paragraphs', 'sentences', 'words'] as const).map(t => (
+                <Button
+                  key={t}
+                  size="sm"
+                  variant={type === t ? 'default' : 'outline'}
                   onClick={() => setType(t)}
-                  className="text-xs capitalize"
+                  className="capitalize"
                 >
                   {t}
                 </Button>
               ))}
             </div>
-
-            <div className="space-y-2">
-              <Label className="text-sm">Count: {count[0]}</Label>
-              <Slider value={count} onValueChange={setCount} min={1} max={type === "words" ? 500 : 20} />
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Checkbox id="lorem" checked={startWithLorem} onCheckedChange={(c) => setStartWithLorem(c === true)} />
-              <Label htmlFor="lorem" className="text-sm">Start with "Lorem ipsum"</Label>
-            </div>
-
-            <div className="flex gap-2">
-              <Button size="sm" onClick={generate} className="bg-gradient-primary">
-                <RefreshCw className="h-3 w-3 mr-1" />
-                Generate
-              </Button>
-              <Button size="sm" onClick={copyToClipboard} variant="outline" disabled={!output}>
-                <Copy className="h-3 w-3 mr-1" />
-                Copy
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="lg:col-span-2">
-          <CardContent className="p-3">
-            <Textarea
-              value={output}
-              readOnly
-              placeholder="Generated text will appear here..."
-              className="min-h-[300px] font-serif"
-            />
-          </CardContent>
-        </Card>
+          </div>
+          <div>
+            <Label className="text-sm mb-2 block">Count: {count[0]}</Label>
+            <Slider value={count} onValueChange={setCount} max={type === 'words' ? 100 : 10} min={1} step={1} />
+          </div>
+          <div className="flex items-center gap-2">
+            <Checkbox id="start-lorem" checked={startWithLorem} onCheckedChange={(c) => setStartWithLorem(c === true)} />
+            <Label htmlFor="start-lorem" className="text-sm cursor-pointer">Start with "Lorem ipsum..."</Label>
+          </div>
+        </div>
+        <Textarea
+          value={output}
+          readOnly
+          placeholder="Generated text will appear here..."
+          className="min-h-[300px] font-serif"
+        />
       </div>
-    </div>
+    </ToolShell>
   )
 }

@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react"
 import { CodeEditor } from "@/components/ui/code-editor"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Braces, Copy, Download, Zap, AlertCircle, CheckCircle } from "lucide-react"
+import { ToolShell, TwoPanelLayout } from "@/components/tools/shared/tool-shell"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Braces, Zap, Trash2, MinusCircle, AlertCircle, CheckCircle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { ToolComponentProps } from "@/components/workspace/tool-panel"
 import { useWorkspace } from "@/context/workspace-context"
@@ -191,7 +192,7 @@ export function GraphqlFormatterTool({ tabId, initialInput, onOutputChange }: To
   const savedState = getToolState(tabId)
   const { toast } = useToast()
   
-  const [input, setInput] = useState(savedState?.input as string || initialInput || `query GetUser($id: ID!) {
+  const [input, setInput] = useState(initialInput || savedState?.input as string || `query GetUser($id: ID!) {
   user(id: $id) { id name email posts { id title createdAt } friends { id name } } }
 
 mutation CreatePost($input: CreatePostInput!) {
@@ -239,37 +240,14 @@ fragment UserFields on User { id name email avatar }`)
     }
   }
 
-  const copyOutput = async () => {
-    await navigator.clipboard.writeText(output)
-    toast({ title: "Copied to clipboard" })
-  }
 
-  const downloadGql = () => {
-    const blob = new Blob([output || input], { type: 'text/plain' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'query.graphql'
-    a.click()
-    URL.revokeObjectURL(url)
-  }
 
   return (
-    <div className="space-y-4 p-4">
-      <div className="flex items-center gap-2">
-        <Braces className="h-5 w-5 text-primary" />
-        <h2 className="text-lg font-semibold font-mono">graphql_formatter</h2>
-      </div>
-
-      <Card>
-        <CardContent className="p-3 flex flex-wrap items-center gap-3">
-          <Button size="sm" onClick={formatInput} className="bg-primary hover:bg-primary/90">
-            <Zap className="h-3 w-3 mr-1" />
-            Format
-          </Button>
-          <Button size="sm" variant="outline" onClick={minifyInput}>
-            Minify
-          </Button>
+    <TooltipProvider>
+      <ToolShell
+        icon={Braces}
+        title="GraphQL Formatter"
+        actions={<>
           <div className="flex items-center gap-2">
             <Label className="text-sm">Indent:</Label>
             <Select value={indentSize} onValueChange={setIndentSize}>
@@ -282,22 +260,10 @@ fragment UserFields on User { id name email avatar }`)
               </SelectContent>
             </Select>
           </div>
-          {output && (
-            <>
-              <Button size="sm" variant="outline" onClick={copyOutput}>
-                <Copy className="h-3 w-3 mr-1" />
-                Copy
-              </Button>
-              <Button size="sm" variant="outline" onClick={downloadGql}>
-                <Download className="h-3 w-3 mr-1" />
-                Download
-              </Button>
-            </>
-          )}
           {error && (
             <span className="text-xs text-destructive flex items-center gap-1">
               <AlertCircle className="h-3 w-3" />
-              {error}
+              Invalid GraphQL
             </span>
           )}
           {output && !error && (
@@ -306,26 +272,57 @@ fragment UserFields on User { id name email avatar }`)
               Valid GraphQL
             </span>
           )}
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <CodeEditor
-          value={input}
-          onChange={setInput}
-          placeholder="Paste GraphQL query here..."
-          language="graphql"
-          title="Input"
+        </>}
+      >
+        <TwoPanelLayout
+          input={
+            <CodeEditor
+              value={input}
+              onChange={setInput}
+              placeholder="Paste GraphQL query here..."
+              language="graphql"
+              title="Input"
+            />
+          }
+          output={
+            <CodeEditor
+              value={output}
+              onChange={() => {}}
+              placeholder="Formatted output..."
+              language="graphql"
+              title="Output"
+              readOnly
+            />
+          }
+          actions={<>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="icon" onClick={formatInput} className="h-8 w-8 rounded-full bg-gradient-primary text-primary-foreground shadow-sm">
+                  <Zap className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right"><p>Format GraphQL</p></TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="icon" variant="ghost" onClick={minifyInput} className="h-7 w-7 rounded-full">
+                  <MinusCircle className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right"><p>Minify GraphQL</p></TooltipContent>
+            </Tooltip>
+            <div className="w-4 h-px md:w-px md:h-4 bg-border/60" />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="icon" variant="ghost" onClick={() => { setInput(""); setOutput(""); setError("") }} className="h-7 w-7 rounded-full text-muted-foreground">
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right"><p>Clear all</p></TooltipContent>
+            </Tooltip>
+          </>}
         />
-        <CodeEditor
-          value={output}
-          onChange={() => {}}
-          placeholder="Formatted output..."
-          language="graphql"
-          title="Output"
-          readOnly
-        />
-      </div>
-    </div>
+      </ToolShell>
+    </TooltipProvider>
   )
 }

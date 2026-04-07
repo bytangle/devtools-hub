@@ -1,6 +1,7 @@
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+
 import { Button } from "@/components/ui/button"
+import { ToolShell } from "@/components/tools/shared/tool-shell"
 import { Slider } from "@/components/ui/slider"
 import { Label } from "@/components/ui/label"
 import { Image, Upload, Download } from "lucide-react"
@@ -70,82 +71,70 @@ export function ImageOptimizerTool({ tabId }: ToolComponentProps) {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Image className="h-5 w-5 text-primary" />
-        <h2 className="text-lg font-semibold">Image Optimizer</h2>
+    <ToolShell
+      icon={Image}
+      title="Image Optimizer"
+      actions={<>
+        <Button size="sm" onClick={optimizeImage} disabled={!image} className="bg-gradient-primary">
+          Optimize
+        </Button>
+        <Button size="sm" onClick={downloadOptimized} disabled={!optimized} variant="outline">
+          <Download className="h-3 w-3 mr-1" />
+          Download
+        </Button>
+      </>}
+    >
+      <div>
+        <Label className="text-sm">Upload Image</Label>
+        <label className="mt-2 flex items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50">
+          <div className="text-center">
+            <Upload className="h-6 w-6 mx-auto text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">Click to upload</span>
+          </div>
+          <input type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
+        </label>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Settings</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label className="text-sm">Upload Image</Label>
-              <label className="mt-2 flex items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50">
-                <div className="text-center">
-                  <Upload className="h-6 w-6 mx-auto text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">Click to upload</span>
-                </div>
-                <input type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
-              </label>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-sm">Quality: {quality[0]}%</Label>
-              <Slider value={quality} onValueChange={setQuality} min={1} max={100} />
-            </div>
-
-            <div className="flex gap-2">
-              <Button size="sm" onClick={optimizeImage} disabled={!image} className="bg-gradient-primary">
-                Optimize
-              </Button>
-              <Button size="sm" onClick={downloadOptimized} disabled={!optimized} variant="outline">
-                <Download className="h-3 w-3 mr-1" />
-                Download
-              </Button>
-            </div>
-
-            {originalSize > 0 && newSize > 0 && (
-              <div className="text-xs text-muted-foreground space-y-1">
-                <div>Original: {formatSize(originalSize)}</div>
-                <div>Optimized: {formatSize(newSize)}</div>
-                <div className="text-green-600">
-                  Saved: {((1 - newSize / originalSize) * 100).toFixed(1)}%
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Original</CardTitle>
-          </CardHeader>
-          <CardContent className="flex items-center justify-center min-h-[200px]">
-            {image ? (
-              <img src={image} alt="Original" className="max-w-full max-h-[200px] rounded" />
-            ) : (
-              <span className="text-sm text-muted-foreground">No image uploaded</span>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Optimized</CardTitle>
-          </CardHeader>
-          <CardContent className="flex items-center justify-center min-h-[200px]">
-            {optimized ? (
-              <img src={optimized} alt="Optimized" className="max-w-full max-h-[200px] rounded" />
-            ) : (
-              <span className="text-sm text-muted-foreground">Click optimize</span>
-            )}
-          </CardContent>
-        </Card>
+      <div className="space-y-2">
+        <Label className="text-sm">Quality: {quality[0]}%</Label>
+        <Slider value={quality} onValueChange={setQuality} min={1} max={100} />
       </div>
-    </div>
+
+      {originalSize > 0 && newSize > 0 && (
+        <div className="text-xs text-muted-foreground space-y-1">
+          <div>Original: {formatSize(originalSize)}</div>
+          <div>Optimized: {formatSize(newSize)}</div>
+          <div className="text-green-600">
+            Saved: {((1 - newSize / originalSize) * 100).toFixed(1)}%
+          </div>
+        </div>
+      )}
+
+      <div className="rounded-lg border p-4">
+        <div className="pb-3">
+          <div className="text-sm font-semibold">Original</div>
+        </div>
+        <div className="flex items-center justify-center min-h-[200px]">
+          {image ? (
+            <img src={image} alt="Original" className="max-w-full max-h-[200px] rounded" />
+          ) : (
+            <span className="text-sm text-muted-foreground">No image uploaded</span>
+          )}
+        </div>
+      </div>
+
+      <div className="rounded-lg border p-4">
+        <div className="pb-3">
+          <div className="text-sm font-semibold">Optimized</div>
+        </div>
+        <div className="flex items-center justify-center min-h-[200px]">
+          {optimized ? (
+            <img src={optimized} alt="Optimized" className="max-w-full max-h-[200px] rounded" />
+          ) : (
+            <span className="text-sm text-muted-foreground">Click optimize</span>
+          )}
+        </div>
+      </div>
+    </ToolShell>
   )
 }

@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from "react"
 import { CodeEditor } from "@/components/ui/code-editor"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { GitCompare, Zap, Copy, Download, Plus, Minus, Equal } from "lucide-react"
+import { ToolShell, TwoPanelLayout } from "@/components/tools/shared/tool-shell"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { GitCompare, Zap, Trash2, ArrowLeftRight, Plus, Minus, Equal } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { ToolComponentProps } from "@/components/workspace/tool-panel"
 import { useWorkspace } from "@/context/workspace-context"
@@ -64,15 +65,22 @@ function computeDiff(text1: string, text2: string): DiffLine[] {
   return result
 }
 
-export function DiffCheckerTool({ tabId }: ToolComponentProps) {
+export function DiffCheckerTool({ tabId, initialInput, onOutputChange }: ToolComponentProps) {
   const { getToolState, setToolState } = useWorkspace()
   const savedState = getToolState(tabId)
   
-  const [text1, setText1] = useState(savedState?.text1 as string || "")
+  const [text1, setText1] = useState(initialInput || savedState?.text1 as string || "")
   const [text2, setText2] = useState(savedState?.text2 as string || "")
   const [diff, setDiff] = useState<DiffLine[]>([])
   const [showLineNumbers, setShowLineNumbers] = useState(true)
   const { toast } = useToast()
+
+  // Update text1 when initialInput changes (for pipeline chaining)
+  useEffect(() => {
+    if (initialInput && initialInput !== text1 && !savedState?.text1) {
+      setText1(initialInput)
+    }
+  }, [initialInput])
 
   useEffect(() => {
     setToolState(tabId, { text1, text2 })
@@ -92,32 +100,17 @@ export function DiffCheckerTool({ tabId }: ToolComponentProps) {
     }
     const result = computeDiff(text1, text2)
     setDiff(result)
+    
+    // Report diff output for pipeline
+    if (onOutputChange) {
+      const diffOutput = result.map(line => {
+        const prefix = line.type === 'add' ? '+' : line.type === 'remove' ? '-' : ' '
+        return `${prefix} ${line.content}`
+      }).join('\n')
+      onOutputChange(diffOutput)
+    }
+    
     toast({ title: `Diff computed: ${result.length} lines analyzed` })
-  }
-
-  const copyUnifiedDiff = async () => {
-    const unified = diff.map(d => {
-      const prefix = d.type === 'add' ? '+' : d.type === 'remove' ? '-' : ' '
-      return `${prefix} ${d.content}`
-    }).join('\n')
-    
-    await navigator.clipboard.writeText(unified)
-    toast({ title: "Unified diff copied to clipboard" })
-  }
-
-  const downloadDiff = () => {
-    const unified = diff.map(d => {
-      const prefix = d.type === 'add' ? '+' : d.type === 'remove' ? '-' : ' '
-      return `${prefix} ${d.content}`
-    }).join('\n')
-    
-    const blob = new Blob([unified], { type: 'text/plain' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'diff.patch'
-    a.click()
-    URL.revokeObjectURL(url)
   }
 
   const swapTexts = () => {
@@ -128,58 +121,47 @@ export function DiffCheckerTool({ tabId }: ToolComponentProps) {
   }
 
   return (
-    <div className="space-y-4 p-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <GitCompare className="h-5 w-5 text-primary" />
-          <h2 className="text-lg font-semibold font-mono">diff_checker</h2>
-        </div>
-      </div>
-
-      <Card>
-        <CardContent className="p-3 flex flex-wrap items-center gap-3">
-          <Button size="sm" onClick={compareDiff} className="bg-primary hover:bg-primary/90">
-            <Zap className="h-3 w-3 mr-1" />
-            Compare
-          </Button>
-          <Button size="sm" variant="outline" onClick={swapTexts}>
-            Swap
-          </Button>
-          {diff.length > 0 && (
-            <>
-              <Button size="sm" variant="outline" onClick={copyUnifiedDiff}>
-                <Copy className="h-3 w-3 mr-1" />
-                Copy Diff
-              </Button>
-              <Button size="sm" variant="outline" onClick={downloadDiff}>
-                <Download className="h-3 w-3 mr-1" />
-                Export .patch
-              </Button>
-            </>
-          )}
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <CodeEditor 
-          value={text1} 
-          onChange={(v) => { setText1(v); setDiff([]) }}
-          placeholder="Original text..." 
-          language="text" 
-          title="Original" 
-        />
-        <CodeEditor 
-          value={text2} 
-          onChange={(v) => { setText2(v); setDiff([]) }}
-          placeholder="Modified text..." 
-          language="text" 
-          title="Modified" 
-        />
-      </div>
+    <ToolShell
+      icon={GitCompare}
+      title="Diff Checker"
+    >
+      <div className="flex flex-col gap-3 h-full">
+        <TooltipProvider delayDuration={200}>
+          <TwoPanelLayout
+            input={<CodeEditor value={text1} onChange={(v) => { setText1(v); setDiff([]) }} placeholder="Original text..." language="text" title="Original" />}
+            actions={<>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="icon" onClick={compareDiff} className="h-8 w-8 rounded-full bg-gradient-primary text-primary-foreground shadow-sm">
+                    <Zap className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right"><p>Compare</p></TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="icon" variant="ghost" onClick={swapTexts} className="h-7 w-7 rounded-full">
+                    <ArrowLeftRight className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right"><p>Swap texts</p></TooltipContent>
+              </Tooltip>
+              <div className="w-4 h-px md:w-px md:h-4 bg-border/60" />
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="icon" variant="ghost" onClick={() => { setText1(""); setText2(""); setDiff([]) }} className="h-7 w-7 rounded-full text-muted-foreground">
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right"><p>Clear all</p></TooltipContent>
+              </Tooltip>
+            </>}
+            output={<CodeEditor value={text2} onChange={(v) => { setText2(v); setDiff([]) }} placeholder="Modified text..." language="text" title="Modified" />}
+          />
+        </TooltipProvider>
 
       {diff.length > 0 && (
-        <Card>
-          <CardContent className="p-4">
+        <div className="rounded-lg border p-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-medium font-mono">Diff Result</h3>
               <div className="flex items-center gap-2">
@@ -243,9 +225,9 @@ export function DiffCheckerTool({ tabId }: ToolComponentProps) {
                 ))}
               </div>
             </ScrollArea>
-          </CardContent>
-        </Card>
+        </div>
       )}
-    </div>
+      </div>
+    </ToolShell>
   )
 }

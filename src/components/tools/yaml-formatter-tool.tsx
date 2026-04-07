@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react"
 import { CodeEditor } from "@/components/ui/code-editor"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { FileText, Copy, Download, Zap, AlertCircle, CheckCircle } from "lucide-react"
+import { ToolShell, TwoPanelLayout } from "@/components/tools/shared/tool-shell"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { FileText, Zap, Trash2, AlertCircle, CheckCircle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { ToolComponentProps } from "@/components/workspace/tool-panel"
 import { useWorkspace } from "@/context/workspace-context"
@@ -14,7 +15,10 @@ function parseYaml(yaml: string): { data: any; error: string | null } {
   try {
     const lines = yaml.split('\n')
     const result: any = {}
-    const stack: { indent: number; obj: any; key: string | null }[] = [{ indent: -1, obj: result, key: null }]
+    // Stack tracks: indent level, the container object, and the key in parent that holds this container
+    const stack: { indent: number; container: any; parentRef: { obj: any; key: string } | null }[] = [
+      { indent: -1, container: result, parentRef: null }
+    ]
     
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i]
@@ -30,19 +34,26 @@ function parseYaml(yaml: string): { data: any; error: string | null } {
         while (stack.length > 1 && stack[stack.length - 1].indent >= indent) {
           stack.pop()
         }
-        const parent = stack[stack.length - 1].obj
-        const key = stack[stack.length - 1].key
-        if (key && !Array.isArray(parent[key])) {
-          parent[key] = []
+        const top = stack[stack.length - 1]
+        // Convert the container to an array if it isn't already
+        if (top.parentRef && !Array.isArray(top.container)) {
+          const arr: any[] = []
+          top.parentRef.obj[top.parentRef.key] = arr
+          top.container = arr
         }
         const value = trimmed.slice(2).trim()
-        if (key) {
-          if (value.includes(':')) {
-            const obj = {}
-            parent[key].push(obj)
-            stack.push({ indent, obj, key: null })
+        if (Array.isArray(top.container)) {
+          if (value && value.includes(':')) {
+            const obj: any = {}
+            // Parse inline key:value in list item
+            const ci = value.indexOf(':')
+            const k = value.slice(0, ci).trim()
+            const v = value.slice(ci + 1).trim()
+            obj[k] = v ? parseValue(v) : {}
+            top.container.push(obj)
+            stack.push({ indent, container: obj, parentRef: null })
           } else {
-            parent[key].push(parseValue(value))
+            top.container.push(parseValue(value))
           }
         }
         continue
@@ -60,13 +71,15 @@ function parseYaml(yaml: string): { data: any; error: string | null } {
         stack.pop()
       }
       
-      const parent = stack[stack.length - 1].obj
+      const container = stack[stack.length - 1].container
       
       if (valueStr) {
-        parent[key] = parseValue(valueStr)
+        container[key] = parseValue(valueStr)
       } else {
-        parent[key] = {}
-        stack.push({ indent, obj: parent[key], key })
+        // Create a nested object; may be converted to array if list items follow
+        const nested = {}
+        container[key] = nested
+        stack.push({ indent, container: nested, parentRef: { obj: container, key } })
       }
     }
     
@@ -136,7 +149,7 @@ export function YamlFormatterTool({ tabId, initialInput, onOutputChange }: ToolC
   const savedState = getToolState(tabId)
   const { toast } = useToast()
   
-  const [input, setInput] = useState(savedState?.input as string || initialInput || `# Example YAML
+  const [input, setInput] = useState(initialInput || savedState?.input as string || `# Example YAML
 server:
   host: localhost
   port: 8080
@@ -184,36 +197,14 @@ features:
     toast({ title: "YAML formatted successfully" })
   }
 
-  const copyOutput = async () => {
-    await navigator.clipboard.writeText(output)
-    toast({ title: "Copied to clipboard" })
-  }
 
-  const downloadYaml = () => {
-    const blob = new Blob([output || input], { type: 'text/yaml' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'formatted.yaml'
-    a.click()
-    URL.revokeObjectURL(url)
-  }
 
   return (
-    <div className="space-y-4 p-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <FileText className="h-5 w-5 text-primary" />
-          <h2 className="text-lg font-semibold font-mono">yaml_formatter</h2>
-        </div>
-      </div>
-
-      <Card>
-        <CardContent className="p-3 flex flex-wrap items-center gap-3">
-          <Button size="sm" onClick={formatInput} className="bg-primary hover:bg-primary/90">
-            <Zap className="h-3 w-3 mr-1" />
-            Format
-          </Button>
+    <TooltipProvider>
+      <ToolShell
+        icon={FileText}
+        title="YAML Formatter"
+        actions={<>
           <div className="flex items-center gap-2">
             <Label className="text-sm">Indent:</Label>
             <Select value={indentSize} onValueChange={setIndentSize}>
@@ -226,22 +217,10 @@ features:
               </SelectContent>
             </Select>
           </div>
-          {output && (
-            <>
-              <Button size="sm" variant="outline" onClick={copyOutput}>
-                <Copy className="h-3 w-3 mr-1" />
-                Copy
-              </Button>
-              <Button size="sm" variant="outline" onClick={downloadYaml}>
-                <Download className="h-3 w-3 mr-1" />
-                Download
-              </Button>
-            </>
-          )}
           {error && (
             <span className="text-xs text-destructive flex items-center gap-1">
               <AlertCircle className="h-3 w-3" />
-              {error}
+              Invalid YAML
             </span>
           )}
           {output && !error && (
@@ -250,26 +229,49 @@ features:
               Valid YAML
             </span>
           )}
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <CodeEditor
-          value={input}
-          onChange={setInput}
-          placeholder="Paste YAML here..."
-          language="yaml"
-          title="Input"
+        </>}
+      >
+        <TwoPanelLayout
+          input={
+            <CodeEditor
+              value={input}
+              onChange={setInput}
+              placeholder="Paste YAML here..."
+              language="yaml"
+              title="Input"
+            />
+          }
+          output={
+            <CodeEditor
+              value={output}
+              onChange={() => {}}
+              placeholder="Formatted output..."
+              language="yaml"
+              title="Output"
+              readOnly
+            />
+          }
+          actions={<>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="icon" onClick={formatInput} className="h-8 w-8 rounded-full bg-gradient-primary text-primary-foreground shadow-sm">
+                  <Zap className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right"><p>Format YAML</p></TooltipContent>
+            </Tooltip>
+            <div className="w-4 h-px md:w-px md:h-4 bg-border/60" />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="icon" variant="ghost" onClick={() => { setInput(""); setOutput(""); setError("") }} className="h-7 w-7 rounded-full text-muted-foreground">
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right"><p>Clear all</p></TooltipContent>
+            </Tooltip>
+          </>}
         />
-        <CodeEditor
-          value={output}
-          onChange={() => {}}
-          placeholder="Formatted output..."
-          language="yaml"
-          title="Output"
-          readOnly
-        />
-      </div>
-    </div>
+      </ToolShell>
+    </TooltipProvider>
   )
 }

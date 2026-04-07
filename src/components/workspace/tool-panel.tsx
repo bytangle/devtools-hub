@@ -50,7 +50,7 @@ interface ToolPanelProps {
 }
 
 // Tool component registry
-const toolComponents: Record<string, React.ComponentType<ToolComponentProps>> = {
+export const toolComponents: Record<string, React.ComponentType<ToolComponentProps>> = {
   "json-formatter": JsonFormatterTool,
   "html-formatter": HtmlFormatterTool,
   "css-formatter": CssFormatterTool,
@@ -131,12 +131,12 @@ export function ToolPanel({ tabId }: ToolPanelProps) {
   }
 
   return (
-    <ScrollArea className="h-full">
-      <div className="p-4">
+    <div className="h-full flex flex-col overflow-hidden">
+      <div className="flex-1 overflow-auto p-4">
         <ToolComponent 
           tabId={tabId}
         />
       </div>
-    </ScrollArea>
+    </div>
   )
 }

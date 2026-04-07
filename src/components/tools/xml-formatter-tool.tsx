@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react"
 import { CodeEditor } from "@/components/ui/code-editor"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { FileCode, Copy, Download, Zap, AlertCircle, CheckCircle } from "lucide-react"
+import { ToolShell, TwoPanelLayout } from "@/components/tools/shared/tool-shell"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { FileCode, Zap, Trash2, MinusCircle, AlertCircle, CheckCircle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { ToolComponentProps } from "@/components/workspace/tool-panel"
 import { useWorkspace } from "@/context/workspace-context"
@@ -75,7 +76,7 @@ export function XmlFormatterTool({ tabId, initialInput, onOutputChange }: ToolCo
   const savedState = getToolState(tabId)
   const { toast } = useToast()
   
-  const [input, setInput] = useState(savedState?.input as string || initialInput || `<?xml version="1.0" encoding="UTF-8"?>
+  const [input, setInput] = useState(initialInput || savedState?.input as string || `<?xml version="1.0" encoding="UTF-8"?>
 <catalog><book id="1"><author>John Doe</author><title>XML Basics</title><price currency="USD">29.99</price></book><book id="2"><author>Jane Smith</author><title>Advanced XML</title><price currency="USD">49.99</price></book></catalog>`)
   const [output, setOutput] = useState('')
   const [indentSize, setIndentSize] = useState<string>('2')
@@ -118,37 +119,14 @@ export function XmlFormatterTool({ tabId, initialInput, onOutputChange }: ToolCo
     }
   }
 
-  const copyOutput = async () => {
-    await navigator.clipboard.writeText(output)
-    toast({ title: "Copied to clipboard" })
-  }
 
-  const downloadXml = () => {
-    const blob = new Blob([output || input], { type: 'text/xml' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'formatted.xml'
-    a.click()
-    URL.revokeObjectURL(url)
-  }
 
   return (
-    <div className="space-y-4 p-4">
-      <div className="flex items-center gap-2">
-        <FileCode className="h-5 w-5 text-primary" />
-        <h2 className="text-lg font-semibold font-mono">xml_formatter</h2>
-      </div>
-
-      <Card>
-        <CardContent className="p-3 flex flex-wrap items-center gap-3">
-          <Button size="sm" onClick={formatInput} className="bg-primary hover:bg-primary/90">
-            <Zap className="h-3 w-3 mr-1" />
-            Format
-          </Button>
-          <Button size="sm" variant="outline" onClick={minifyInput}>
-            Minify
-          </Button>
+    <TooltipProvider>
+      <ToolShell
+        icon={FileCode}
+        title="XML Formatter"
+        actions={<>
           <div className="flex items-center gap-2">
             <Label className="text-sm">Indent:</Label>
             <Select value={indentSize} onValueChange={setIndentSize}>
@@ -161,18 +139,6 @@ export function XmlFormatterTool({ tabId, initialInput, onOutputChange }: ToolCo
               </SelectContent>
             </Select>
           </div>
-          {output && (
-            <>
-              <Button size="sm" variant="outline" onClick={copyOutput}>
-                <Copy className="h-3 w-3 mr-1" />
-                Copy
-              </Button>
-              <Button size="sm" variant="outline" onClick={downloadXml}>
-                <Download className="h-3 w-3 mr-1" />
-                Download
-              </Button>
-            </>
-          )}
           {error && (
             <span className="text-xs text-destructive flex items-center gap-1">
               <AlertCircle className="h-3 w-3" />
@@ -185,26 +151,57 @@ export function XmlFormatterTool({ tabId, initialInput, onOutputChange }: ToolCo
               Valid XML
             </span>
           )}
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <CodeEditor
-          value={input}
-          onChange={setInput}
-          placeholder="Paste XML here..."
-          language="xml"
-          title="Input"
+        </>}
+      >
+        <TwoPanelLayout
+          input={
+            <CodeEditor
+              value={input}
+              onChange={setInput}
+              placeholder="Paste XML here..."
+              language="xml"
+              title="Input"
+            />
+          }
+          output={
+            <CodeEditor
+              value={output}
+              onChange={() => {}}
+              placeholder="Formatted output..."
+              language="xml"
+              title="Output"
+              readOnly
+            />
+          }
+          actions={<>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="icon" onClick={formatInput} className="h-8 w-8 rounded-full bg-gradient-primary text-primary-foreground shadow-sm">
+                  <Zap className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right"><p>Format XML</p></TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="icon" variant="ghost" onClick={minifyInput} className="h-7 w-7 rounded-full">
+                  <MinusCircle className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right"><p>Minify XML</p></TooltipContent>
+            </Tooltip>
+            <div className="w-4 h-px md:w-px md:h-4 bg-border/60" />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="icon" variant="ghost" onClick={() => { setInput(""); setOutput(""); setError("") }} className="h-7 w-7 rounded-full text-muted-foreground">
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right"><p>Clear all</p></TooltipContent>
+            </Tooltip>
+          </>}
         />
-        <CodeEditor
-          value={output}
-          onChange={() => {}}
-          placeholder="Formatted output..."
-          language="xml"
-          title="Output"
-          readOnly
-        />
-      </div>
-    </div>
+      </ToolShell>
+    </TooltipProvider>
   )
 }

@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo } from "react"
-import { Card, CardContent } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
-import { FileText, Download, Copy, Bold, Italic, Code, Link, List, Heading1, Heading2, Quote } from "lucide-react"
+import { FileText, Download, Copy, Bold, Italic, Code, Link, List, Heading1, Heading2, Quote, Trash2 } from "lucide-react"
 import { ToolComponentProps } from "@/components/workspace/tool-panel"
 import { useWorkspace } from "@/context/workspace-context"
 import { Button } from "@/components/ui/button"
+import { ToolShell, TwoPanelLayout } from "@/components/tools/shared/tool-shell"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useToast } from "@/hooks/use-toast"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
@@ -143,7 +144,7 @@ export function MarkdownPreviewTool({ tabId, initialInput, onOutputChange }: Too
   const savedState = getToolState(tabId)
   const { toast } = useToast()
   
-  const [markdown, setMarkdown] = useState(savedState?.markdown as string || initialInput || `# Markdown Preview
+  const [markdown, setMarkdown] = useState(initialInput || savedState?.markdown as string || `# Markdown Preview
 
 A **powerful** markdown editor with _live preview_.
 
@@ -237,57 +238,63 @@ Made with ♥ using \`devtools_hub\`
   ]
 
   return (
-    <div className="space-y-4 p-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <FileText className="h-5 w-5 text-primary" />
-          <h2 className="text-lg font-semibold font-mono">markdown_preview</h2>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline" onClick={copyHtml}>
-            <Copy className="h-3 w-3 mr-1" />
-            Copy HTML
+    <ToolShell
+      icon={FileText}
+      title="Markdown Preview"
+      actions={<>
+        {toolbarItems.map((item, i) => (
+          <Button key={i} size="sm" variant="ghost" onClick={item.action} title={item.title} className="h-8 w-8 p-0">
+            <item.icon className="h-4 w-4" />
           </Button>
-          <Button size="sm" variant="outline" onClick={downloadMd}>
-            <Download className="h-3 w-3 mr-1" />
-            Export .md
-          </Button>
-        </div>
-      </div>
-
-      <Card>
-        <CardContent className="p-2 flex flex-wrap gap-1">
-          {toolbarItems.map((item, i) => (
-            <Button key={i} size="sm" variant="ghost" onClick={item.action} title={item.title} className="h-8 w-8 p-0">
-              <item.icon className="h-4 w-4" />
-            </Button>
-          ))}
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-[500px]">
-        <Card className="flex flex-col">
-          <CardContent className="p-3 flex-1">
-            <Textarea
-              value={markdown}
-              onChange={(e) => setMarkdown(e.target.value)}
-              placeholder="Write markdown here..."
-              className="h-full min-h-full font-mono text-sm resize-none border-0 focus-visible:ring-0"
-            />
-          </CardContent>
-        </Card>
-
-        <Card className="flex flex-col">
-          <CardContent className="p-4 flex-1 overflow-hidden">
-            <ScrollArea className="h-full">
-              <div 
-                className="prose prose-sm dark:prose-invert max-w-none"
-                dangerouslySetInnerHTML={{ __html: renderedHtml }}
-              />
-            </ScrollArea>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+        ))}
+        <Button size="sm" variant="outline" onClick={copyHtml}>
+          <Copy className="h-3 w-3 mr-1" />
+          Copy HTML
+        </Button>
+        <Button size="sm" variant="outline" onClick={downloadMd}>
+          <Download className="h-3 w-3 mr-1" />
+          Export .md
+        </Button>
+      </>}
+    >
+      <TooltipProvider delayDuration={200}>
+        <TwoPanelLayout
+          input={
+            <div className="rounded-lg border flex flex-col h-full">
+              <div className="p-3 flex-1">
+                <Textarea
+                  value={markdown}
+                  onChange={(e) => setMarkdown(e.target.value)}
+                  placeholder="Write markdown here..."
+                  className="h-full min-h-full font-mono text-sm resize-none border-0 focus-visible:ring-0"
+                />
+              </div>
+            </div>
+          }
+          actions={<>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="icon" variant="ghost" onClick={() => setMarkdown("")} className="h-7 w-7 rounded-full text-muted-foreground">
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right"><p>Clear all</p></TooltipContent>
+            </Tooltip>
+          </>}
+          output={
+            <div className="rounded-lg border flex flex-col h-full">
+              <div className="p-4 flex-1 overflow-hidden">
+                <ScrollArea className="h-full">
+                  <div 
+                    className="prose prose-sm dark:prose-invert max-w-none"
+                    dangerouslySetInnerHTML={{ __html: renderedHtml }}
+                  />
+                </ScrollArea>
+              </div>
+            </div>
+          }
+        />
+      </TooltipProvider>
+    </ToolShell>
   )
 }

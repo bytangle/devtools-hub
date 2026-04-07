@@ -23,6 +23,8 @@ export interface PipelineNode {
   inputSource: "manual" | "previous" | string // previous node id
   input?: string // For manual input
   output?: string
+  position?: { x: number; y: number } // Canvas position
+  config?: Record<string, unknown> // Per-step configuration
 }
 
 // Pipeline configuration
@@ -88,6 +90,7 @@ interface WorkspaceActions {
   updatePipelineNode: (nodeId: string, updates: Partial<PipelineNode>) => void
   movePipelineNode: (fromIndex: number, toIndex: number) => void
   clearPipeline: () => void
+  insertPipelineNode: (toolId: string, afterIndex: number) => void
   
   // Utilities
   getToolById: (toolId: string) => Tool | undefined
@@ -413,6 +416,23 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     }))
   }, [activePipelineId])
 
+  const insertPipelineNode = useCallback((toolId: string, afterIndex: number) => {
+    const pipelineId = activePipelineId ?? "default"
+    setPipelines(prev => prev.map(pipeline => {
+      if (pipeline.id === pipelineId) {
+        const newNode: PipelineNode = {
+          id: generateId(),
+          toolId,
+          inputSource: "previous"
+        }
+        const nodes = [...pipeline.nodes]
+        nodes.splice(afterIndex + 1, 0, newNode)
+        return { ...pipeline, nodes }
+      }
+      return pipeline
+    }))
+  }, [activePipelineId])
+
   const value: WorkspaceContextType = {
     tabs,
     activeTabId,
@@ -444,6 +464,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     updatePipelineNode,
     movePipelineNode,
     clearPipeline,
+    insertPipelineNode,
     getToolById,
     getTabById
   }

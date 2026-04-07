@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
+import { ToolShell } from "@/components/tools/shared/tool-shell"
 import { Palette, Copy } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { ToolComponentProps } from "@/components/workspace/tool-panel"
@@ -77,84 +77,77 @@ export function ColorPickerTool({ tabId, onOutputChange }: ToolComponentProps) {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Palette className="h-5 w-5 text-primary" />
-        <h2 className="text-lg font-semibold">Color Picker</h2>
-      </div>
+    <ToolShell
+      icon={Palette}
+      title="Color Picker"
+      actions={<>
+        <Button size="sm" variant="outline" onClick={() => copyToClipboard(color)}>
+          <Copy className="h-4 w-4 mr-1" /> Copy HEX
+        </Button>
+      </>}
+    >
+      <div className="space-y-6">
+        <div className="flex items-start gap-4">
+          <input
+            type="color"
+            value={color}
+            onChange={(e) => setColor(e.target.value)}
+            className="w-20 h-20 cursor-pointer rounded border-0"
+          />
+          <div
+            className="w-20 h-20 rounded border shadow-inner"
+            style={{ backgroundColor: color }}
+          />
+        </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Pick Color</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex gap-4 items-center">
-              <input
-                type="color"
-                value={color}
-                onChange={(e) => setColor(e.target.value)}
-                className="w-20 h-20 cursor-pointer rounded border-0"
-              />
-              <div 
-                className="w-20 h-20 rounded border shadow-inner" 
-                style={{ backgroundColor: color }}
-              />
-            </div>
-            <div>
-              <Label className="text-sm">HEX</Label>
-              <div className="flex gap-2">
-                <Input value={color} onChange={(e) => setColor(e.target.value)} className="font-mono" />
-                <Button size="icon" variant="outline" onClick={() => copyToClipboard(color)}>
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <div>
+          <Label className="text-sm">HEX</Label>
+          <div className="flex gap-2">
+            <Input value={color} onChange={(e) => setColor(e.target.value)} className="font-mono" />
+            <Button size="icon" variant="outline" onClick={() => copyToClipboard(color)}>
+              <Copy className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Color Values</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label className="text-sm">RGB</Label>
-              <div className="flex gap-2">
-                <Input value={rgbStr} readOnly className="font-mono text-sm" />
-                <Button size="icon" variant="outline" onClick={() => copyToClipboard(rgbStr)}>
-                  <Copy className="h-4 w-4" />
-                </Button>
+        <div className="rounded-lg border p-4 space-y-4">
+          <Label className="text-sm font-semibold">Color Values</Label>
+          <div>
+            <Label className="text-sm">RGB</Label>
+            <div className="flex gap-2">
+              <Input value={rgbStr} readOnly className="font-mono text-sm" />
+              <Button size="icon" variant="outline" onClick={() => copyToClipboard(rgbStr)}>
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          <div>
+            <Label className="text-sm">HSL</Label>
+            <div className="flex gap-2">
+              <Input value={hslStr} readOnly className="font-mono text-sm" />
+              <Button size="icon" variant="outline" onClick={() => copyToClipboard(hslStr)}>
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          {rgb && (
+            <div className="grid grid-cols-3 gap-2 text-center text-sm">
+              <div className="p-2 bg-muted rounded">
+                <div className="text-muted-foreground text-xs">R</div>
+                <div className="font-mono">{rgb.r}</div>
+              </div>
+              <div className="p-2 bg-muted rounded">
+                <div className="text-muted-foreground text-xs">G</div>
+                <div className="font-mono">{rgb.g}</div>
+              </div>
+              <div className="p-2 bg-muted rounded">
+                <div className="text-muted-foreground text-xs">B</div>
+                <div className="font-mono">{rgb.b}</div>
               </div>
             </div>
-            <div>
-              <Label className="text-sm">HSL</Label>
-              <div className="flex gap-2">
-                <Input value={hslStr} readOnly className="font-mono text-sm" />
-                <Button size="icon" variant="outline" onClick={() => copyToClipboard(hslStr)}>
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            {rgb && (
-              <div className="grid grid-cols-3 gap-2 text-center text-sm">
-                <div className="p-2 bg-muted rounded">
-                  <div className="text-muted-foreground text-xs">R</div>
-                  <div className="font-mono">{rgb.r}</div>
-                </div>
-                <div className="p-2 bg-muted rounded">
-                  <div className="text-muted-foreground text-xs">G</div>
-                  <div className="font-mono">{rgb.g}</div>
-                </div>
-                <div className="p-2 bg-muted rounded">
-                  <div className="text-muted-foreground text-xs">B</div>
-                  <div className="font-mono">{rgb.b}</div>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+          )}
+        </div>
       </div>
-    </div>
+    </ToolShell>
   )
 }
