@@ -21,7 +21,6 @@ import { ImageOptimizerTool } from "@/components/tools/image-optimizer-tool"
 import { QrGeneratorTool } from "@/components/tools/qr-generator-tool"
 import { TimestampConverterTool } from "@/components/tools/timestamp-converter-tool"
 import { RegexTesterTool } from "@/components/tools/regex-tester-tool"
-import { UrlShortenerTool } from "@/components/tools/url-shortener-tool"
 import { TextCounterTool } from "@/components/tools/text-counter-tool"
 import { DiffCheckerTool } from "@/components/tools/diff-checker-tool"
 import { LoremGeneratorTool } from "@/components/tools/lorem-generator-tool"
@@ -70,7 +69,6 @@ export const toolComponents: Record<string, React.ComponentType<ToolComponentPro
   "qr-generator": QrGeneratorTool,
   "timestamp-converter": TimestampConverterTool,
   "regex-tester": RegexTesterTool,
-  "url-shortener": UrlShortenerTool,
   "text-counter": TextCounterTool,
   "diff-checker": DiffCheckerTool,
   "lorem-generator": LoremGeneratorTool,

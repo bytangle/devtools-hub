@@ -3,7 +3,7 @@ import {
   FileCode, Palette, Calculator, Lock, 
   Globe, Binary, Clock, FileImage, Search,
   Zap, CheckCircle, RefreshCw, Type, Download,
-  GitCompare, Link, Shield, Table, ArrowLeftRight,
+  GitCompare, Shield, Table, ArrowLeftRight,
   Sparkles, HardDrive, Braces, Key
 } from "lucide-react"
 
@@ -257,16 +257,6 @@ export const tools: Tool[] = [
     category: "Formatter",
     featured: true,
     keywords: ["javascript minifier", "js minifier", "minify js", "compress javascript", "js minify online"]
-  },
-  {
-    id: "url-shortener",
-    title: "URL Shortener",
-    description: "Create short URLs for sharing. Free URL shortener with instant link generation.",
-    icon: Link,
-    href: "/tools/url-shortener",
-    category: "Utility",
-    featured: true,
-    keywords: ["url shortener", "shorten url", "link shortener", "short url generator", "tiny url"]
   },
   {
     id: "text-counter",

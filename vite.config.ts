@@ -29,7 +29,6 @@ const toolRoutes = [
   "/tools/markdown-preview",
   "/tools/minify-css",
   "/tools/minify-js",
-  "/tools/url-shortener",
   "/tools/text-counter",
   "/tools/diff-checker",
   "/tools/text-case-converter",

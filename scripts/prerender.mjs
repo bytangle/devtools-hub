@@ -46,7 +46,6 @@ const tools = [
   { id: "markdown-preview", title: "Markdown Preview", desc: "Preview and render Markdown with live editing.", cat: "Utility", kw: "markdown preview, markdown editor, markdown viewer" },
   { id: "minify-css", title: "CSS Minifier", desc: "Minify and compress CSS for production. Reduce CSS file size for faster page loads.", cat: "Formatter", kw: "css minifier, minify css, css compressor, compress css" },
   { id: "minify-js", title: "JavaScript Minifier", desc: "Minify and compress JavaScript for production.", cat: "Formatter", kw: "javascript minifier, js minifier, minify js, compress javascript" },
-  { id: "url-shortener", title: "URL Shortener", desc: "Create short URLs for sharing.", cat: "Utility", kw: "url shortener, shorten url, link shortener" },
   { id: "text-counter", title: "Text Counter", desc: "Count characters, words, sentences, and lines in text.", cat: "Utility", kw: "text counter, word counter, character counter" },
   { id: "diff-checker", title: "Diff Checker", desc: "Compare two texts and find differences with side-by-side view.", cat: "Utility", kw: "diff checker, text compare, diff tool online" },
   { id: "text-case-converter", title: "Text Case Converter", desc: "Convert text between camelCase, snake_case, PascalCase, UPPER CASE, and more.", cat: "Converter", kw: "case converter, text case converter, camelcase converter" },

@@ -85,7 +85,8 @@ export function TwoPanelLayout({ input, output, actions, toolbar, className }: T
     <div className={cn("flex flex-col gap-3 h-full", className)}>
       {toolbar}
       <div className="flex-1 min-h-0">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 h-full relative">
+        {/* Desktop: side-by-side grid with floating pill */}
+        <div className="hidden md:grid md:grid-cols-2 gap-3 h-full relative">
           <div className="min-w-0 min-h-0 [&>*]:h-full">
             {input}
           </div>
@@ -96,11 +97,30 @@ export function TwoPanelLayout({ input, output, actions, toolbar, className }: T
           {/* Floating action pill — hovers at the panel junction (hidden in pipeline mode) */}
           {!isPipelineMode && (
             <div className="absolute inset-x-0 top-[35%] pointer-events-none flex justify-center z-10">
-              <div className="pointer-events-auto flex md:flex-col items-center gap-0.5 px-1.5 py-1 md:px-1 md:py-1.5 rounded-full bg-background/90 backdrop-blur-md border border-border/60 shadow-lg shadow-black/20 h-fit">
+              <div className="pointer-events-auto flex flex-col items-center gap-0.5 px-1 py-1.5 rounded-full bg-background/90 backdrop-blur-md border border-border/60 shadow-lg shadow-black/20 h-fit">
                 {actions}
               </div>
             </div>
           )}
+        </div>
+
+        {/* Mobile: stacked with inline action bar between panels */}
+        <div className="flex flex-col gap-3 h-full md:hidden">
+          <div className="min-w-0 min-h-0 flex-1 [&>*]:h-full">
+            {input}
+          </div>
+
+          {!isPipelineMode && (
+            <div className="flex justify-center">
+              <div className="flex items-center gap-0.5 px-1.5 py-1 rounded-full bg-background/90 backdrop-blur-md border border-border/60 shadow-lg shadow-black/20">
+                {actions}
+              </div>
+            </div>
+          )}
+
+          <div className="min-w-0 min-h-0 flex-1 [&>*]:h-full">
+            {output}
+          </div>
         </div>
       </div>
     </div>
