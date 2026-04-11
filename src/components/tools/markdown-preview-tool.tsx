@@ -146,38 +146,38 @@ export function MarkdownPreviewTool({ tabId, initialInput, onOutputChange }: Too
   
   const [markdown, setMarkdown] = useState(initialInput || savedState?.markdown as string || `# Markdown Preview
 
-A **powerful** markdown editor with _live preview_.
+    A **powerful** markdown editor with _live preview_.
 
-## Features
+    ## Features
 
-- [x] Real-time rendering
-- [x] Code syntax highlighting
-- [ ] Task lists
-- [ ] Tables support
+    - [x] Real-time rendering
+    - [x] Code syntax highlighting
+    - [ ] Task lists
+    - [ ] Tables support
 
-### Code Blocks
+    ### Code Blocks
 
-\`\`\`typescript
-const greeting = (name: string): string => {
-  return \`Hello, \${name}!\`;
-};
+    \`\`\`typescript
+    const greeting = (name: string): string => {
+      return \`Hello, \${name}!\`;
+    };
 
-console.log(greeting("World"));
-\`\`\`
+    console.log(greeting("World"));
+    \`\`\`
 
-### Blockquotes
+    ### Blockquotes
 
-> "The only way to do great work is to love what you do."  
-> — Steve Jobs
+    > "The only way to do great work is to love what you do."  
+    > — Steve Jobs
 
-### Links & Images
+    ### Links & Images
 
-Check out [GitHub](https://github.com "GitHub Homepage") for more.
+    Check out [GitHub](https://github.com "GitHub Homepage") for more.
 
----
+    ---
 
-Made with ♥ using \`devtools_hub\`
-`)
+    Made with ♥ using \`devtools_hub\`
+  `)
 
   useEffect(() => {
     setToolState(tabId, { markdown })

@@ -245,6 +245,22 @@ function quickHash(str: string): string {
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   Passthrough tools — these analyse/validate input without
+   transforming it.  In a pipeline the *original* input is
+   forwarded to the next step so the chain isn't broken.
+   ═══════════════════════════════════════════════════════════════ */
+const PASSTHROUGH_TOOLS = new Set([
+  "json-validator",
+  "html-validator",
+  "css-validator",
+  "text-counter",
+  "hash-generator",
+  "regex-tester",
+  "byte-unit-converter",
+  "timestamp-converter",
+])
+
+/* ═══════════════════════════════════════════════════════════════
    Tool processor  (config-aware)
    ═══════════════════════════════════════════════════════════════ */
 async function processToolStep(
@@ -2038,7 +2054,11 @@ export function PipelineBuilder() {
             mergedConfig,
           )
           updatePipelineNode(node.id, { output })
-          currentInput = output
+          // Passthrough tools (validators, counters, etc.) show their
+          // result but forward the original input to the next step.
+          if (!PASSTHROUGH_TOOLS.has(node.toolId)) {
+            currentInput = output
+          }
         }
       } finally {
         setIsRunning(false)
