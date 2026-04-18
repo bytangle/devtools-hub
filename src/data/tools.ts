@@ -4,7 +4,7 @@ import {
   Globe, Binary, Clock, FileImage, Search,
   Zap, CheckCircle, RefreshCw, Type, Download,
   GitCompare, Shield, Table, ArrowLeftRight,
-  Sparkles, HardDrive, Braces, Key
+  Sparkles, HardDrive, Braces, Key, Minimize2
 } from "lucide-react"
 
 export interface Tool {
@@ -102,12 +102,12 @@ export const tools: Tool[] = [
   {
     id: "uuid-generator",
     title: "UUID Generator",
-    description: "Generate random UUID v4 identifiers online. Create unique IDs for databases and applications.",
+    description: "Generate UUID v1, v4, v5, and v7 identifiers online. Create unique IDs for databases, APIs, and applications.",
     icon: Zap,
     href: "/tools/uuid-generator",
     category: "Generator",
     featured: true,
-    keywords: ["uuid generator", "guid generator", "random uuid", "uuid v4", "generate unique id"]
+    keywords: ["uuid generator", "guid generator", "random uuid", "uuid v4", "uuid v7", "uuid v1", "uuid v5", "generate unique id", "uuid online", "bulk uuid generator"]
   },
   {
     id: "html-formatter",
@@ -412,6 +412,16 @@ export const tools: Tool[] = [
     category: "Generator",
     featured: true,
     keywords: ["jwt generator", "jwt token generator", "create jwt", "jwt maker", "jwt token creator"]
+  },
+  {
+    id: "prompt-compressor",
+    title: "Prompt Compressor",
+    description: "Compress prompts for LLMs by removing predictable grammar. Save tokens while preserving meaning.",
+    icon: Minimize2,
+    href: "/tools/prompt-compressor",
+    category: "Utility",
+    featured: true,
+    keywords: ["prompt compressor", "token optimizer", "compress prompt", "reduce tokens", "llm optimizer", "caveman compression", "chatgpt token saver", "ai prompt optimizer", "gpt token reducer", "token counter", "prompt optimizer"]
   }
 ]
 

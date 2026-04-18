@@ -30,7 +30,7 @@ const tools = [
   { id: "regex-tester", title: "Regex Tester", desc: "Test and debug regular expressions with real-time matching and highlighting.", cat: "Utility", kw: "regex tester, regex online, regular expression tester, regex debugger" },
   { id: "json-formatter", title: "JSON Formatter", desc: "Format, beautify, and validate JSON data online. Pretty-print JSON with syntax highlighting.", cat: "Formatter", kw: "json formatter, json beautifier, json pretty print, format json online" },
   { id: "lorem-generator", title: "Lorem Ipsum Generator", desc: "Generate lorem ipsum placeholder text for designs, mockups, and development.", cat: "Generator", kw: "lorem ipsum generator, placeholder text, dummy text generator" },
-  { id: "uuid-generator", title: "UUID Generator", desc: "Generate random UUID v4 identifiers online. Create unique IDs for databases and applications.", cat: "Generator", kw: "uuid generator, guid generator, random uuid, uuid v4" },
+  { id: "uuid-generator", title: "UUID Generator", desc: "Generate UUID v1, v4, v5, and v7 identifiers online. Create unique IDs for databases, APIs, and applications.", cat: "Generator", kw: "uuid generator, guid generator, random uuid, uuid v4, uuid v7, uuid v1, uuid v5, generate unique id, uuid online" },
   { id: "html-formatter", title: "HTML Formatter", desc: "Format, beautify, and clean HTML code with proper indentation.", cat: "Formatter", kw: "html formatter, html beautifier, format html, html pretty print" },
   { id: "css-formatter", title: "CSS Formatter", desc: "Beautify, format, and organize CSS stylesheets online.", cat: "Formatter", kw: "css formatter, css beautifier, format css, css pretty print" },
   { id: "sql-formatter", title: "SQL Formatter", desc: "Format and beautify SQL queries with proper indentation and structure.", cat: "Formatter", kw: "sql formatter, sql beautifier, format sql, sql pretty print" },
@@ -62,6 +62,7 @@ const tools = [
   { id: "byte-unit-converter", title: "Byte Unit Converter", desc: "Convert between bytes, KB, MB, GB, TB, and more.", cat: "Converter", kw: "byte converter, mb to gb, kb to mb, data size converter" },
   { id: "graphql-formatter", title: "GraphQL Formatter", desc: "Format and beautify GraphQL queries and schemas.", cat: "Formatter", kw: "graphql formatter, format graphql, graphql beautifier" },
   { id: "jwt-generator", title: "JWT Generator", desc: "Generate JWT tokens with custom payloads for testing.", cat: "Generator", kw: "jwt generator, jwt token generator, create jwt" },
+  { id: "prompt-compressor", title: "Prompt Compressor", desc: "Compress prompts for LLMs by removing predictable grammar. Save tokens while preserving meaning.", cat: "Utility", kw: "prompt compressor, token optimizer, compress prompt, reduce tokens, llm optimizer, caveman compression, token saver, ai prompt optimizer, gpt token reducer" },
 ]
 
 // ---- Blog posts (slugs and titles for meta generation) ----

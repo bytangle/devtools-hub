@@ -43,6 +43,7 @@ import { EscapeUnescapeTool } from "@/components/tools/escape-unescape-tool"
 import { ByteUnitConverterTool } from "@/components/tools/byte-unit-converter-tool"
 import { GraphqlFormatterTool } from "@/components/tools/graphql-formatter-tool"
 import { JwtGeneratorTool } from "@/components/tools/jwt-generator-tool"
+import { PromptCompressorTool } from "@/components/tools/prompt-compressor-tool"
 
 interface ToolPanelProps {
   tabId: string | null | undefined
@@ -91,6 +92,7 @@ export const toolComponents: Record<string, React.ComponentType<ToolComponentPro
   "byte-unit-converter": ByteUnitConverterTool,
   "graphql-formatter": GraphqlFormatterTool,
   "jwt-generator": JwtGeneratorTool,
+  "prompt-compressor": PromptCompressorTool,
 }
 
 export interface ToolComponentProps {
