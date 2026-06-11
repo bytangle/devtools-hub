@@ -44,6 +44,7 @@ import { ByteUnitConverterTool } from "@/components/tools/byte-unit-converter-to
 import { GraphqlFormatterTool } from "@/components/tools/graphql-formatter-tool"
 import { JwtGeneratorTool } from "@/components/tools/jwt-generator-tool"
 import { PromptCompressorTool } from "@/components/tools/prompt-compressor-tool"
+import { MarkdownConverterTool } from "@/components/tools/markdown-converter-tool"
 
 interface ToolPanelProps {
   tabId: string | null | undefined
@@ -93,6 +94,7 @@ export const toolComponents: Record<string, React.ComponentType<ToolComponentPro
   "graphql-formatter": GraphqlFormatterTool,
   "jwt-generator": JwtGeneratorTool,
   "prompt-compressor": PromptCompressorTool,
+  "markdown-converter": MarkdownConverterTool,
 }
 
 export interface ToolComponentProps {

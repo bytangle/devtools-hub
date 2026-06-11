@@ -422,6 +422,16 @@ export const tools: Tool[] = [
     category: "Utility",
     featured: true,
     keywords: ["prompt compressor", "token optimizer", "compress prompt", "reduce tokens", "llm optimizer", "caveman compression", "chatgpt token saver", "ai prompt optimizer", "gpt token reducer", "token counter", "prompt optimizer"]
+  },
+  {
+    id: "markdown-converter",
+    title: "Markdown Converter",
+    description: "Convert HTML, CSV, JSON, and rich text to clean Markdown. Perfect for docs and LLM pipelines.",
+    icon: FileText,
+    href: "/tools/markdown-converter",
+    category: "Converter",
+    featured: true,
+    keywords: ["markdown converter", "html to markdown", "csv to markdown table", "json to markdown", "convert to markdown online", "markitdown alternative", "rich text to markdown", "markdown for llm"]
   }
 ]
 
