@@ -432,6 +432,16 @@ export const tools: Tool[] = [
     category: "Converter",
     featured: true,
     keywords: ["markdown converter", "html to markdown", "csv to markdown table", "json to markdown", "convert to markdown online", "markitdown alternative", "rich text to markdown", "markdown for llm"]
+  },
+  {
+    id: "youtube-transcript",
+    title: "YouTube Transcript",
+    description: "Extract YouTube video transcripts as Markdown, plain text, SRT, or VTT subtitles. Free transcript downloader.",
+    icon: Download,
+    href: "/tools/youtube-transcript",
+    category: "Converter",
+    featured: true,
+    keywords: ["youtube transcript", "youtube transcript downloader", "youtube to text", "video transcript extractor", "youtube subtitles download", "youtube to markdown", "youtube srt download", "transcribe youtube video"]
   }
 ]
 
